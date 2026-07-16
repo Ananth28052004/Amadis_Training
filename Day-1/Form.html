@@ -1,0 +1,110 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Form</title>
+    </head>
+    <body>
+        <style>
+            *{
+               margin: 0;
+               padding: 0;
+            }
+            body{
+                background-color: lightcyan;
+            }
+            .form{
+                display: flex;
+               justify-content: center;
+               align-items: center;
+               height: 100vh;
+            }
+            form{
+                border: 1px solid black;
+                border-radius: 1em;
+                background-color: antiquewhite;
+                width: 400px;
+                height: 450px;
+                box-shadow:10px 15px 10px 5px bisque;
+            }
+            label{
+                display: inline-block;
+                width: 150px;
+            }
+            label{
+                padding: 10px;
+            }
+            
+            h1{
+                padding: 15px;
+                text-align: center;
+            }
+            .btn{
+                padding: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap:30px;
+                
+            }
+            button{
+                height: 25px;
+                width: 60px;
+                cursor: pointer;
+                transition: 1s;
+                border-radius: 2em;
+            }
+            #reset{
+                background-color: red;
+                color: white;
+            }
+            #submit{
+                color: white;
+                background-color: green;
+            }
+            #reset:hover{
+                 height: 30px;
+                width: 70px;
+                cursor: pointer;
+                transition: 0.5s;
+            }
+             #submit:hover{
+                 height: 30px;
+                width: 70px;
+                cursor: pointer;
+                transition: 0.5s;
+            }
+        </style>
+        <div class="form">
+        <form>
+            <h1>Create account</h1>
+            <label for="fname">First Name:</label>
+            <input type="text" id="fname"><br>
+            <label for="lname">Last Name:</label>
+            <input type="text" id="lname"><br>
+            <label for="phone">Phone No:</label>
+            <input type="number" id="phone"><br>
+            <label for="date">DOB:</label>
+            <input type="date" id="date"><br>
+            <label for="genter">Genter</label>
+            <input type="radio" id="male" name="genter">
+            <label for="male" style="display: inline; font-size: 12px;">Male</label>
+            <input type="radio" id="female" name="genter">
+            <label for="female" style="display: inline; font-size: 12px;">Female</label>
+            <input type="radio" id="others" name="genter">
+            <label for="others" style="display: inline; font-size: 12px;">Others</label>
+            <label for="username">User Name</label>
+            <input type="text" id="username"><br>
+            <label for="password">Password</label>
+            <input type="text" id="passward"><br>
+            <label for="cpassword">Confirm Password</label>
+            <input type="password" id="cpassword"><br>
+            <div class="btn">
+                <button type="reset" id="reset">Reset</button>
+            <button type="submit" id="submit">Submit</button>
+            </div>
+        </form>
+        </div>
+    </body>
+    </html>
