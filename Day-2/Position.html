@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ponition</title>
+</head>
+<body>
+    <style>
+        body{
+            height: 2000px;
+        }
+        .one ,.two{
+            height: 400px;
+            width: 200px;
+            background-color:aqua;
+        }
+        .one h1{
+            position: relative;
+            top:100px;
+            left: 40px;
+        }
+        .title{
+            text-align: center  ;
+            font-style: italic;
+            font-size: 40px;
+        }
+        .two h1{
+            position: absolute;
+            top:400px;
+            left: 100px;
+        }
+        .img{
+            height: 200px;
+            width: 400px;
+            position:fixed;
+            top: 100px;
+            left: 500px;
+        }
+        h2{
+            height: 200px;
+            width: 200px;
+            background-color: blue;
+            position: sticky;
+            top:10px;
+        }
+
+    </style>
+    <h1 class="title">Position</h1>
+    <div class="one">
+        <h1>Position relative</h1>
+    </div><br>
+    <div class="two">
+        <h1>Position Absolute</h1>
+    </div>
+    <div class="three">
+        <h1>Position Fixed</h1>
+        <img class="img"src="Averanges.jpg" alt="">
+    </div>
+    <div class="Four">
+        <h2>position sticky</h2>
+    </div>
+ 
+</body>
+</html>
