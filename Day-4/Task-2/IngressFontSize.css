@@ -1,0 +1,40 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    background-color: lightcyan;
+}
+.contaner{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.font{
+    height: 300px;
+    width: 500px;
+    border: 1px solid black;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 2em;
+    background-color: lightcoral;
+}
+.btndiv{
+    display: flex;
+    justify-content: center;
+    gap:40px ;
+    margin-top: 30px;
+}
+.btndiv button{
+    height: 25px;
+    width: 100px;
+    border-radius: 2em;
+}
+#add{
+    background-color: blue;
+}
+#sub{
+    background-color: red;
+}
