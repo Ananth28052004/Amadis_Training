@@ -1,0 +1,64 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+body{
+    background-color:antiquewhite;
+}
+.head{
+    text-align: center;
+    text-decoration: underline;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+.usingid{
+    margin-top: 40px;
+    height: 100px;
+    
+
+}
+.usingid h3{
+    text-align: center;
+    color:blueviolet;
+}
+.usingclass h3{
+    text-align: center;
+    color: violet;
+}
+.usingclass label{
+    display: inline-block;
+    width: 200px;
+    margin: 10px;
+}
+.usingclass{
+    height: 140px;
+}
+h6{
+    font-size: 17px;
+}
+.usingtagname h3{
+    text-align: center;
+    color:cadetblue
+}
+.usingtagname{
+    height: 180px;
+}
+.queryselector h3{
+    text-align: center;
+    color: tomato;
+}
+.queryselector h5{
+    font-size: 17px;
+    margin-top: 20px;
+    text-align: center;
+}
+.queryselector{
+    height: 170px;
+}
+.queryselectorall{
+    height: 170px;
+}
+.queryselectorall h3{
+    color:red;
+    text-align: center;
+}

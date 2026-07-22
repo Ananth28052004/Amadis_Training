@@ -1,0 +1,27 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+.clickh1{
+    height: 100px;
+    width: 100px;
+    background-color: red;
+    border:1px solid red;
+    border-radius: 2em;
+}
+.click,.dclick{
+    height: 120px;
+
+}
+.click h1{
+    display: none;
+}
+.headh1{
+    text-align: center;
+}
+.mouseover,.mouseleave,.mouseup,.mousedown{
+    height: 100px;
+    width: 100px;
+    background-color: aqua;
+}
