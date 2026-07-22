@@ -1,0 +1,16 @@
+.h1class{
+    height: 100px;
+    width: 100px;
+    background-color: rgb(19, 212, 212);
+    text-align: center;
+}
+.first{
+    color: red;
+    font-size: 20px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+}
+.sec{
+    color: blue;
+    font-size: 50px;
+    font-family: 'Times New Roman', Times, serif;
+}
