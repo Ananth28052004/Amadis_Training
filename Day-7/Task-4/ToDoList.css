@@ -1,0 +1,75 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+body{
+    background-color: aquamarine;
+}
+.head{
+    text-align: center;
+    font-size: 40px;
+    font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+    font-style: italic;
+    margin-bottom: 70px;
+}
+.divtodolist{
+    display: flex;
+    justify-content: center;
+    
+    align-items: center;
+}
+.divtodolist label{
+    display: inline-block;
+    width: 80px;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+    font-size: 17px;
+}
+.divtodolist input{
+    height: 25px;
+    width: 200px;
+    border-radius: 1em;
+    background-color:wheat;
+}
+.divtodolist button{
+    height: 25px;
+    width:70px;
+    margin-left: 20px;
+    border-radius: 1em;
+    background-color: springgreen;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 15px;
+    text-align: center;
+}
+.divtodolist button:active{
+    background-color:blue;
+}
+.ul{
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    flex-direction: column;
+   
+}
+.li{
+    margin-top: 10px;
+    font-family:'Times New Roman', Times, serif;
+    font-size: 20px;
+    height: 24px;
+    width: 180px;
+    border: 1px solid black;
+    text-align:center;
+  
+    display: inline;
+    border-radius: 1em;
+    background-color: cornsilk;
+    
+}
+.button{
+   height: 25px;
+   width: 100px;
+   border-radius:2em;
+   background: red;
+}
