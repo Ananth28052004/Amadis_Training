@@ -1,12 +1,12 @@
-
-import './App.css'
-
+import Function from "./Component/Function"
+import Login from "./Component/Login"
 function App() {
 
 
   return (
-    <>
-    <h1>hello Ananth</h1>
+  <>
+  <Login></Login>
+    {/* <Function></Function> */}
     </>
   )
 }
