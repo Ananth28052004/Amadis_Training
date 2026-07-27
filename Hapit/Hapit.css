@@ -1,0 +1,102 @@
+body{
+    font-family:Arial, sans-serif;
+    margin:0;
+    padding:20px;
+    color:#333;
+    background-color: lightblue;
+}
+.container{
+    max-width:500px;
+    margin:0 auto;
+}
+h1 {
+    text-align:center;
+    color:#333;
+}
+.date {
+    text-align:center;
+    color:#777;
+    margin-bottom:20px;
+}
+.box {
+    background:white;
+    border-radius:20px;
+    padding:15px;
+    margin-bottom:20px;
+    box-shadow:0 1px 3px rgba(0, 0, 0, 0.15);
+    background-color: lightgreen;
+}
+.box h2{
+    margin-top:0;
+    font-size:18px;
+}
+input[type="text"],
+textarea{
+    width:100%;
+    padding:8px;
+    font-size:15px;
+    border:1px solid #ccc;
+    border-radius:5px;
+    box-sizing:border-box;
+    background-color: lightgoldenrodyellow;
+}
+button {
+    padding:8px 14px;
+    font-size:15px;
+    border:none;
+    border-radius:15px;
+    background:#4a90a4;
+    color:white;
+    cursor:pointer;
+    margin-top:8px;
+}
+button:hover{
+    background:#3a7686;
+}
+.habit-item{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:10px;
+    border-bottom:1px solid #eee;
+}
+.habit-item:last-child{
+    border-bottom:none;
+}
+.habit-name{
+    font-size:15px;
+}
+.streak{
+    font-size:12px;
+    color:#e07b00;
+}
+.habit-buttons button{
+    margin-top:0;
+    margin-left:5px;
+}
+.done-btn{
+    background:#4caf50;
+}
+.not-done-btn{
+    background:#ccc;
+    color:#333;
+}
+.delete-btn{
+    background:#d9534f;
+}
+.mood-row{
+    display:flex;
+    gap:10px;
+    font-size:28px;
+}
+.mood-row span{
+    cursor: pointer;
+    padding:5px;
+    border-radius:5px;
+}
+.mood-row span.selected{
+    background:#cde;
+}
+.summary p{
+    margin:5px 0;
+}

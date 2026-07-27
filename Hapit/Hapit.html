@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>My Habit Tracker</title>
+    <link rel="stylesheet" href="Hapit.css" />
+    <style></style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🌱 Habit Tracker</h1>
+      <div class="date" id="todayDate"></div>
+      <div class="box">
+        <h2>Add a new habit</h2>
+        <input type="text" id="habitInput" placeholder="e.g. Drink water" />
+        <button onclick="addHabit()">Add Habit</button>
+      </div>
+      <div class="box">
+        <h2>Habits</h2>
+        <div id="habitList"></div>
+      </div>
+      <div class="box">
+        <h2>How do you feel today?</h2>
+        <div class="mood-row" id="moodRow"></div>
+      </div>
+      <div class="box">
+        <h2>Journal</h2>
+        <textarea
+          id="journalInput"
+          rows="4"
+          placeholder="Write something..."
+        ></textarea>
+        <button onclick="saveJournal()">Save Journal</button>
+      </div>
+      <div class="box summary">
+        <h2>Summary</h2>
+        <p id="summaryText"></p>
+      </div>
+    </div>
+
+
+
+    
+    <script src="Hapit.js"></script>
+  </body>
+</html>
