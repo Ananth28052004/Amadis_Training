@@ -1,7 +1,7 @@
 let habits = JSON.parse(localStorage.getItem("habits"))||[];
 let moods = JSON.parse(localStorage.getItem("moods"))||{};
 let journalEntries = JSON.parse(localStorage.getItem("journal"))||{};
-document.getElementById("todayDate").textContent=getToday();
+document.getElementById("todayDate").textContent="Day: "+getToday();
 
 function getToday(){
     return new Date().toISOString().split("T")[0];
