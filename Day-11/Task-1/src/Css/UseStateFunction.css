@@ -1,0 +1,22 @@
+.main{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+.h1{
+    color: rgb(223, 15, 153);
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 30px;
+}
+.div {
+    height: 100px;
+    width: 100px;
+    background-color: limegreen;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+button{
+    background-color:lightcoral;
+}

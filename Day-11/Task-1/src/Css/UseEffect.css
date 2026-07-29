@@ -1,0 +1,13 @@
+
+.head{
+    color: red;
+    text-align: center;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 31px;
+}
+body{
+    background-color:lightblue;
+}
+.headdata{
+    text-align: center;
+}
