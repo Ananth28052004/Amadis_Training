@@ -3,6 +3,7 @@ import Home from "./Components/Home";
 import UseStateFunction from "./Components/UsestateFunction";
 import UseEffect from "./Components/UseEffectFunction";
 import Useref from "./Components/UseRef";
+import UseMemo from "./Components/UseMemo";
 
 const rootRouter = createRootRoute({
   component: () => {
@@ -12,6 +13,7 @@ const rootRouter = createRootRoute({
     <Link to="/usestate">UseState</Link>
     <Link to="/useEffect">UseEffect</Link>
     <Link to="/useRef">UseRef</Link>
+    <Link to="/useMemo">UseMeko</Link>
         <Outlet />
       </>
     );
@@ -40,8 +42,12 @@ const useRef=createRoute({
   path:"/useRef",
   component:Useref,
 })
-
-const routeTree = rootRouter.addChildren([home, useStateRoot, useEfectRoot,useRef]);
+const useMemo=createRoute({
+  getParentRoute:()=>rootRouter,
+  path:"/useMemo",
+  component:UseMemo,
+})
+const routeTree = rootRouter.addChildren([home, useStateRoot, useEfectRoot,useRef,useMemo]);
 
 export const router = createRouter({
   routeTree,
