@@ -3,60 +3,35 @@ import { Recipe, Ingredient, DietTag } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-
-interface Props {
+interface Props{
   initial?: Recipe;
   onSave: (recipe: Recipe) => void;
   onCancel: () => void;
 }
-
 const VALID_DIETS: DietTag[] = ["vegan", "glutenFree", "dairyFree"];
-
-// Turns free-text textarea lines into an Ingredient[] array.
-// Basic line:        "400g | Spaghetti"
-// With substitution: "2 | Large eggs | vegan:Scrambled tofu:yes | Softer, milder flavor"
-//   part 3 = "diet:substituteName:significant"  (significant is "yes" or "no")
-//   part 4 (optional) = the warning note shown for that substitution
 function parseIngredients(text: string): Ingredient[] {
-  return text
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line, index) => {
+  return text.split("\n").map((line) => line.trim()).filter(Boolean).map((line, index) => {
       const parts = line.split("|").map((part) => part.trim());
       const [quantity, name, subPart, note] = parts;
-
       const ingredient: Ingredient = {
         id: `custom-${Date.now()}-${index}`,
         quantity: quantity || "",
         name: name || quantity || line,
       };
-
-      // subPart looks like "vegan:Scrambled tofu:yes"
       if (subPart) {
         const [dietRaw, subName, significantRaw] = subPart.split(":").map((p) => p.trim());
         const diet = dietRaw as DietTag;
-
         if (VALID_DIETS.includes(diet) && subName) {
           ingredient.subs = {
-            [diet]: {
-              name: subName,
-              significant: significantRaw?.toLowerCase() === "yes",
-              note: note || undefined,
-            },
+            [diet]: {name: subName,significant: significantRaw?.toLowerCase() === "yes",note: note || undefined,},
           };
         }
       }
-
       return ingredient;
     });
 }
-
-// Reverses parseIngredients, so editing an existing recipe shows the
-// substitution info back in the textarea in the same format.
 function ingredientsToText(ingredients: Ingredient[]): string {
-  return ingredients
-    .map((i) => {
+  return ingredients.map((i) => {
       let line = `${i.quantity} | ${i.name}`;
       if (i.subs) {
         const [diet, sub] = Object.entries(i.subs)[0] ?? [];
@@ -75,52 +50,35 @@ export function RecipeForm({ initial, onSave, onCancel }: Props) {
   const [description, setDescription] = useState(initial?.description ?? "");
   const [imageUrl, setImageUrl] = useState(initial?.imageUrl ?? "");
   const [ingredientsText, setIngredientsText] = useState(
-    initial ? ingredientsToText(initial.ingredients) : ""
-  );
+    initial ? ingredientsToText(initial.ingredients) : "");
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!name.trim()) return;
-
     const recipe: Recipe = {
       id: initial?.id ?? name.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
       name: name.trim(),
       description: description.trim(),
-      imageUrl:
-        imageUrl.trim() ||
-        "https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800&auto=format&fit=crop",
-      // Note: user-created ingredients start with no pre-built
-      // substitution rules. In a real product, this is where you'd
-      // look ingredients up against a substitution database/API to   
-      // auto-attach subs. Here we keep it simple and explicit.
+      imageUrl:imageUrl.trim(),
       ingredients: parseIngredients(ingredientsText),
     };
     onSave(recipe);
   }
-
   return (
     <form onSubmit={handleSubmit} className="flex flex-col gap-4 max-w-xl">
       <div>
         <label className="text-sm font-medium block mb-1">Recipe name</label>
         <Input value={name} onChange={(e) => setName(e.target.value)} required />
       </div>
-
       <div>
         <label className="text-sm font-medium block mb-1">Description</label>
-        <Textarea
-          rows={2}
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
+        <Textarea rows={2}value={description}onChange={(e) => setDescription(e.target.value)}/>
       </div>
 
       <div>
         <label className="text-sm font-medium block mb-1">Image URL</label>
-        <Input
-          value={imageUrl}
-          onChange={(e) => setImageUrl(e.target.value)}
-          placeholder="https://..."
-        />
+        <Input value={imageUrl}onChange={(e) => setImageUrl(e.target.value)}
+          placeholder="https://..."/>
       </div>
 
       <div>
@@ -128,10 +86,7 @@ export function RecipeForm({ initial, onSave, onCancel }: Props) {
           Ingredients - one per line: "quantity | name" (add substitutions
           with "| diet:substitute name:yes-or-no | optional note")
         </label>
-        <Textarea
-          rows={10}
-          value={ingredientsText}
-          onChange={(e) => setIngredientsText(e.target.value)}
+        <Textarea rows={10} value={ingredientsText}onChange={(e) => setIngredientsText(e.target.value)}
           placeholder={
             "400g | Spaghetti\n" +
             "2 | Large eggs | vegan:Scrambled tofu:yes | Softer, milder flavor than egg\n" +
@@ -139,12 +94,9 @@ export function RecipeForm({ initial, onSave, onCancel }: Props) {
           }
         />
       </div>
-
       <div className="flex gap-2">
         <Button type="submit">Save recipe</Button>
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
+        <Button type="button" variant="outline" onClick={onCancel}>Cancel</Button>
       </div>
     </form>
   );

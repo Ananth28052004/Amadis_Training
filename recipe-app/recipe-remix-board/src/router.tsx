@@ -1,9 +1,4 @@
-import {
-  createRootRoute,
-  createRoute,
-  createRouter,
-  Outlet,
-} from "@tanstack/react-router";
+import {createRootRoute,createRoute,createRouter,Outlet,} from "@tanstack/react-router";
 import { RecipeListPage } from "@/pages/RecipeListPage";
 import { RecipeDetailPage } from "@/pages/RecipeDetailPage";
 import { RecipeFormPage } from "@/pages/RecipeFormPage";

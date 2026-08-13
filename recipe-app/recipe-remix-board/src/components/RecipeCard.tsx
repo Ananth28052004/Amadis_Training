@@ -13,11 +13,7 @@ export function RecipeCard({ recipe, onDelete }: Props) {
   return (
     <Card className="bg-white border border-border overflow-hidden flex flex-col transition-all duration-200 hover:shadow-[0_8px_24px_rgba(60,50,30,0.12)] hover:-translate-y-1 rounded-2xl">
       <Link to="/recipe/$recipeId" params={{ recipeId: recipe.id }} className="block overflow-hidden">
-        <img
-          src={recipe.imageUrl}
-          alt={recipe.name}
-          className="h-40 sm:h-44 w-full object-cover transition-transform duration-300 hover:scale-105"
-        />
+        <img src={recipe.imageUrl}alt={recipe.name}className="h-40 sm:h-44 w-full object-cover transition-transform duration-300 hover:scale-105"/>
       </Link>
 
       <CardContent className="flex flex-col flex-1 gap-2 p-4 sm:p-5">

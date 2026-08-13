@@ -3,10 +3,8 @@ import { useRecipes } from "@/hooks/useRecipes";
 import { RecipeCard } from "@/components/RecipeCard";
 import { Button } from "@/components/ui/button";
 import { Plus, UtensilsCrossed } from "lucide-react";
-
 export function RecipeListPage() {
   const { recipes, deleteRecipe } = useRecipes();
-
   return (
     <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-orange-100 via-amber-50 to-yellow-100">
       <div className="absolute -top-40 -left-40 h-96 w-96 rounded-full bg-orange-300/40 blur-3xl"></div>
@@ -16,7 +14,7 @@ export function RecipeListPage() {
         <div className="flex flex-col lg:flex-row justify-between lg:items-center gap-8 mb-10">
           <div>
             <div className="inline-flex items-center gap-2 rounded-full bg-white/80 backdrop-blur-md px-4 py-2 shadow-lg border border-white mb-5">
-               <UtensilsCrossed className="h-4 w-4 text-orange-500" /> {/*icon */}
+               <UtensilsCrossed className="h-4 w-4 text-orange-500" />
               <span className="text-sm font-semibold text-orange-600 hover:bg-red-50">
                 One Meal • Every Diet</span>
           </div>
@@ -33,7 +31,7 @@ export function RecipeListPage() {
 
           <Link to="/recipe/new">
             <Button className=" h-17 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 px-8 py-6 text-white shadow-xl transition-all duration-300 hover:scale-105 hover:shadow-2xl">
-              <Plus className="mr-2 h-5 w-5" />   {/*icon*/}
+              <Plus className="mr-2 h-5 w-5" />
               New Recipe
             </Button>
           </Link>
@@ -62,10 +60,7 @@ export function RecipeListPage() {
         (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
             {recipes.map((recipe) => (
-              <div
-                key={recipe.id}
-                className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02]"
-              >
+              <div key={recipe.id} className="transition-all duration-300 hover:-translate-y-2 hover:scale-[1.02]">
                 <RecipeCard recipe={recipe} onDelete={deleteRecipe} />
               </div>
             ))}

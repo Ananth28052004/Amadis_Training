@@ -45,9 +45,6 @@ export interface Recipe {
   imageUrl: string;
   ingredients: Ingredient[];
 }
-
-// The shape returned after we run the substitution logic on a recipe -
-// this is what the UI actually renders, one row per ingredient.
 export interface ResolvedIngredient {
   id: string;
   quantity: string;
