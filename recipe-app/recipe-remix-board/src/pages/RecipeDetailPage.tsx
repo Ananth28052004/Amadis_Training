@@ -11,11 +11,7 @@ import {
   Restrictions,
 } from "@/types";
 
-export function RecipeDetailPage({
-  recipeId,
-}: {
-  recipeId: string;
-}) {
+export function RecipeDetailPage({recipeId,}: {recipeId: string;}) {
   const { getRecipe } = useRecipes();
   const navigate = useNavigate();
   const recipe = getRecipe(recipeId);
@@ -60,12 +56,7 @@ export function RecipeDetailPage({
   );
 }
 
-function RecipeDetailContent({
-  recipe,
-  restrictions,
-  setRestrictions,
-  onBack,
-}: {
+function RecipeDetailContent({recipe,restrictions,setRestrictions,onBack,}:{
   recipe: Recipe;
   restrictions: Restrictions;
   setRestrictions: (r: Restrictions) => void;
@@ -73,16 +64,10 @@ function RecipeDetailContent({
 }) {
   const resolvedIngredients =
     useSubstitutedIngredients(recipe, restrictions);
-
-  const changedCount = resolvedIngredients.filter(
-    (i) => i.changed
-  ).length;
-
+  const changedCount = resolvedIngredients.filter((i) => i.changed).length;
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
-
-        {/* Back Button */}
         <button
           onClick={onBack}
           className="group mb-6 inline-flex items-center gap-2 rounded-full border bg-white px-4 py-2 shadow-sm transition-all hover:shadow-md hover:-translate-y-0.5"
@@ -93,16 +78,9 @@ function RecipeDetailContent({
           </span>
         </button>
 
-        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]">
-
-          {/* LEFT */}
-          <div>
-
-            {/* Image */}
+        <div className="grid gap-8 lg:grid-cols-[1.2fr_0.8fr]"><div>
             <div className="overflow-hidden rounded-3xl shadow-xl">
-              <img
-                src={recipe.imageUrl}
-                alt={recipe.name}
+              <img src={recipe.imageUrl}alt={recipe.name}
                 className="
                 w-full
                 object-cover
@@ -115,8 +93,6 @@ function RecipeDetailContent({
               "
               />
             </div>
-
-            {/* Recipe Info */}
             <div className="mt-6">
 
               <h1 className="text-3xl font-bold tracking-tight sm:text-5xl">
@@ -128,24 +104,16 @@ function RecipeDetailContent({
               </p>
 
             </div>
-
-            {/* Dietary */}
             <div className="mt-8 rounded-3xl border bg-white/80 backdrop-blur-lg p-6 shadow-lg">
-
               <h2 className="mb-5 text-lg font-semibold">
                 Dietary Restrictions
               </h2>
-
               <DietToggles
                 restrictions={restrictions}
-                onChange={setRestrictions}
-              />
-
+                onChange={setRestrictions}/>
             </div>
 
           </div>
-
-          {/* RIGHT */}
           <div>
 
             <div className="sticky top-6">

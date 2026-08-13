@@ -19,10 +19,6 @@ export function DietToggles({ restrictions, onChange }: Props) {
             id={diet}
             checked={restrictions[diet]}
             onCheckedChange={(checked) =>
-              // Updating state here is what makes the ingredient list
-              // update instantly - no submit button needed. The parent
-              // page holds `restrictions` in useState, so this onChange
-              // triggers a re-render immediately.
               onChange({ ...restrictions, [diet]: checked })
             }
           />

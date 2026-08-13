@@ -131,7 +131,7 @@ function renderSummary(){
         Today's mood: <b>${todayMood}</b>`;
 }
 
-renderHabits();
-renderMoods();
-renderSummary();
+    renderHabits();
+    renderMoods();
+    renderSummary();
 
