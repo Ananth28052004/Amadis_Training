@@ -2,7 +2,7 @@
 {
     class First
     {
-        static void Main(String[] args)
+       public static void Main(String[] args)
         {
             If ifcontition=new If();
             Switch s=new Switch();
