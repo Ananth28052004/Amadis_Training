@@ -184,5 +184,5 @@ ORDER BY month,branch_name;
 SELECT c.customer_id,c.customer_name,COUNT(l.loan_id) AS active_loans FROM Customers c
 JOIN Loans l ON c.customer_id=l.customer_id WHERE l.status='Active'
 GROUP BY c.customer_id,c.customer_name
-HAVING COUNT(l.loan_id)>1;
+
 		 

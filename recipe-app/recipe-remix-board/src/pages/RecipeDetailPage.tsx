@@ -5,11 +5,7 @@ import { useRecipes } from "@/hooks/useRecipes";
 import { useSubstitutedIngredients } from "@/hooks/useSubstitutedIngredients";
 import { DietToggles } from "@/components/DietToggles";
 import { IngredientRow } from "@/components/IngredientRow";
-import {
-  DEFAULT_RESTRICTIONS,
-  Recipe,
-  Restrictions,
-} from "@/types";
+import {DEFAULT_RESTRICTIONS,Recipe,Restrictions,} from "@/types";
 
 export function RecipeDetailPage({recipeId,}: {recipeId: string;}) {
   const { getRecipe } = useRecipes();

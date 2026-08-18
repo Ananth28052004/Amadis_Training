@@ -1,6 +1,6 @@
 # HTTP Forge — AI Agent Guide
 
-This folder is an **HTTP Forge workspace** (`.http-forge/`).
+This folder is already the **HTTP Forge workspace root**. Do not create a second nested `.http-forge/` directory inside it.
 
 > **GitHub Copilot tip:** To keep this guide in every Copilot conversation, add one line to
 > `.github/copilot-instructions.md`: `See .http-forge/AGENTS.md for the HTTP Forge AI guide.`
@@ -55,31 +55,36 @@ Task
 
 ## Folder Structure
 
+> Important: this directory is the workspace root. Use the paths below as-is; do not create another nested `.http-forge/` directory.
+
 ```
-.http-forge/
-  assets/
-    collections/
-      {collection-slug}/
-        collection.json          ← collection metadata (id, name, variables, auth, order)
+assets/
+  collections/
+    {collection-slug}/
+      collection.json          ← collection metadata (id, name, variables, auth, order)
+      scripts/
+        pre-request.js         ← collection-level pre-request script
+        post-response.js       ← collection-level post-response script
+      {folder-slug}/
+        folder.json            ← folder metadata
         scripts/
-          pre-request.js         ← collection-level pre-request script
-          post-response.js       ← collection-level post-response script
-        {folder-slug}/
-          folder.json            ← folder metadata
+          pre-request.js       ← folder-level pre-request script
+          post-response.js     ← folder-level post-response script
         {request-slug}/
           request.json         ← request (method, url, headers, auth, body, scripts…)
           body.json            ← JSON body (when bodyContentType is application/json)
           body.txt             ← raw text body
           body.graphql         ← GraphQL query
           doc.md               ← optional business docs for this request (fed to AI)
-          pre-request.js       ← request-level pre-request script
-          post-response.js     ← assertions live here (pm.test() calls)
-    environments/
-      _global.json               ← global variables + defaultHeaders (all envs)
-      {env}.json                 ← per-environment variables
-      {env}.local.json           ← local overrides — gitignored, never commit
-    suites/
-      {name}.suite.json          ← test suite with control-flow nodes
+          scripts/
+            pre-request.js     ← request-level pre-request script
+            post-response.js   ← assertions live here (pm.test() calls)
+  environments/
+    _global.json               ← global variables + defaultHeaders (all envs)
+    {env}.json                 ← per-environment variables
+    {env}.local.json           ← local overrides — gitignored, never commit
+  suites/
+    {name}.suite.json          ← test suite with control-flow nodes
 ```
 
 ---

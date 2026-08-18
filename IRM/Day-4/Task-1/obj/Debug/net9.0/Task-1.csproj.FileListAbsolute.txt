@@ -1,0 +1,15 @@
+D:\Training_Amadis\IRM\Day-4\Task-1\bin\Debug\net9.0\Task-1.exe
+D:\Training_Amadis\IRM\Day-4\Task-1\bin\Debug\net9.0\Task-1.deps.json
+D:\Training_Amadis\IRM\Day-4\Task-1\bin\Debug\net9.0\Task-1.runtimeconfig.json
+D:\Training_Amadis\IRM\Day-4\Task-1\bin\Debug\net9.0\Task-1.dll
+D:\Training_Amadis\IRM\Day-4\Task-1\bin\Debug\net9.0\Task-1.pdb
+D:\Training_Amadis\IRM\Day-4\Task-1\obj\Debug\net9.0\Task-1.GeneratedMSBuildEditorConfig.editorconfig
+D:\Training_Amadis\IRM\Day-4\Task-1\obj\Debug\net9.0\Task-1.AssemblyInfoInputs.cache
+D:\Training_Amadis\IRM\Day-4\Task-1\obj\Debug\net9.0\Task-1.AssemblyInfo.cs
+D:\Training_Amadis\IRM\Day-4\Task-1\obj\Debug\net9.0\Task-1.csproj.CoreCompileInputs.cache
+D:\Training_Amadis\IRM\Day-4\Task-1\obj\Debug\net9.0\Task-1.sourcelink.json
+D:\Training_Amadis\IRM\Day-4\Task-1\obj\Debug\net9.0\Task-1.dll
+D:\Training_Amadis\IRM\Day-4\Task-1\obj\Debug\net9.0\refint\Task-1.dll
+D:\Training_Amadis\IRM\Day-4\Task-1\obj\Debug\net9.0\Task-1.pdb
+D:\Training_Amadis\IRM\Day-4\Task-1\obj\Debug\net9.0\Task-1.genruntimeconfig.cache
+D:\Training_Amadis\IRM\Day-4\Task-1\obj\Debug\net9.0\ref\Task-1.dll
