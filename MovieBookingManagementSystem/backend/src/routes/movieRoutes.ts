@@ -1,44 +1,83 @@
-import { FastifyInstance } from "fastify";
+import {
+  FastifyInstance,
+} from "fastify";
 
 import {
   createMovie,
-  getAllMovies,
-  getMovieById,
+  getMovies,
   updateMovie,
   deleteMovie,
-} from "../controllers/movieController";
+  getMovieById,
+} from "../controllers/movieController.js";
 
-import { adminMiddleware } from "../middleware/adminMiddleware";
+import {
+  adminOnly,
+} from "../middleware/authMiddleware.js";
 
 const movieRoutes = async (
   app: FastifyInstance
 ) => {
-  // Public
-  app.get("/", getAllMovies);
 
-  app.get("/:movieId", getMovieById);
+  // ============================
+  // GET ALL MOVIES
+  // Anyone can view movies
+  // GET /api/movies
+  // ============================
 
-  // Admin
+  app.get(
+    "/",
+    getMovies
+  );
+
+  // ============================
+  // GET ONE MOVIE
+  // Anyone can view movie
+  // GET /api/movies/:id
+  // ============================
+
+  app.get(
+    "/:id",
+    getMovieById
+  );
+
+  // ============================
+  // CREATE MOVIE
+  // ADMIN ONLY
+  // POST /api/movies
+  // ============================
+
   app.post(
     "/",
     {
-      preHandler: adminMiddleware,
+      preHandler: adminOnly,
     },
     createMovie
   );
 
+  // ============================
+  // UPDATE MOVIE
+  // ADMIN ONLY
+  // PUT /api/movies/:id
+  // ============================
+
   app.put(
-    "/:movieId",
+    "/:id",
     {
-      preHandler: adminMiddleware,
+      preHandler: adminOnly,
     },
     updateMovie
   );
 
+  // ============================
+  // DELETE MOVIE
+  // ADMIN ONLY
+  // DELETE /api/movies/:id
+  // ============================
+
   app.delete(
-    "/:movieId",
+    "/:id",
     {
-      preHandler: adminMiddleware,
+      preHandler: adminOnly,
     },
     deleteMovie
   );

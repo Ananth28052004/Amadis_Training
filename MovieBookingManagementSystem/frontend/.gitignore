@@ -8,5 +8,3 @@ tsconfig.node.json
 vite.config.ts
 public
 node_modules
-components.json
-.tanstack

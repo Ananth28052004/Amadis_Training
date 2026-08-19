@@ -1,48 +1,103 @@
-import { FastifyInstance } from "fastify";
+import {
+  FastifyInstance,
+  FastifyReply,
+  FastifyRequest,
+} from "fastify";
 
 import {
   createShow,
-  getAllShows,
+  getShows,
+  getShowById,
   getShowsByMovie,
   updateShow,
   deleteShow,
-} from "../controllers/showController";
+} from "../controllers/showController.js";
 
-import { adminMiddleware } from "../middleware/adminMiddleware";
+// =====================================
+// ADMIN AUTHENTICATION
+// =====================================
+
+import { adminOnly } from "../middleware/authMiddleware.js";
+
+// =====================================
+// SHOW ROUTES
+// =====================================
 
 const showRoutes = async (
   app: FastifyInstance
 ) => {
 
-  // Public
-  app.get("/", getAllShows);
+  // ===================================
+  // CREATE SHOW
+  // ADMIN ONLY
+  // POST /api/shows
+  // ===================================
+
+  app.post(
+    "/",
+    {
+      preHandler: adminOnly,
+    },
+    createShow
+  );
+
+  // ===================================
+  // GET ALL SHOWS
+  // PUBLIC
+  // GET /api/shows
+  // ===================================
+
+  app.get(
+    "/",
+    getShows
+  );
+
+  // ===================================
+  // GET SHOWS BY MOVIE
+  // PUBLIC
+  // GET /api/shows/movie/:movieId
+  // ===================================
 
   app.get(
     "/movie/:movieId",
     getShowsByMovie
   );
 
-  // Admin
-  app.post(
-    "/",
-    {
-      preHandler: adminMiddleware,
-    },
-    createShow
+  // ===================================
+  // GET SHOW BY ID
+  // PUBLIC
+  // GET /api/shows/:id
+  // ===================================
+
+  app.get(
+    "/:id",
+    getShowById
   );
 
+  // ===================================
+  // UPDATE SHOW
+  // ADMIN ONLY
+  // PUT /api/shows/:id
+  // ===================================
+
   app.put(
-    "/:showId",
+    "/:id",
     {
-      preHandler: adminMiddleware,
+      preHandler: adminOnly,
     },
     updateShow
   );
 
+  // ===================================
+  // DELETE SHOW
+  // ADMIN ONLY
+  // DELETE /api/shows/:id
+  // ===================================
+
   app.delete(
-    "/:showId",
+    "/:id", 
     {
-      preHandler: adminMiddleware,
+      preHandler: adminOnly,
     },
     deleteShow
   );

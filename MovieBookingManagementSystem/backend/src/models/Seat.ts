@@ -1,11 +1,55 @@
 import {
   DataTypes,
   Model,
+  Optional,
 } from "sequelize";
 
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 
-class Seat extends Model {}
+// =====================================
+// SEAT ATTRIBUTES
+// =====================================
+
+interface SeatAttributes {
+  id: number;
+  showId: number;
+  seatNumber: string;
+  status: "available" | "booked";
+}
+
+// =====================================
+// CREATION ATTRIBUTES
+// =====================================
+
+interface SeatCreationAttributes
+  extends Optional<
+    SeatAttributes,
+    "id" | "status"
+  > {}
+
+// =====================================
+// SEAT MODEL
+// =====================================
+
+class Seat extends Model<
+  SeatAttributes,
+  SeatCreationAttributes
+> implements SeatAttributes {
+
+  declare id: number;
+
+  declare showId: number;
+
+  declare seatNumber: string;
+
+  declare status:
+    | "available"
+    | "booked";
+}
+
+// =====================================
+// MODEL CONFIGURATION
+// =====================================
 
 Seat.init(
   {
@@ -21,29 +65,39 @@ Seat.init(
     },
 
     seatNumber: {
-      type: DataTypes.STRING,
+      type: DataTypes.STRING(10),
       allowNull: false,
     },
 
     status: {
       type: DataTypes.ENUM(
-        "AVAILABLE",
-        "LOCKED",
-        "BOOKED"
+        "available",
+        "booked"
       ),
-      defaultValue: "AVAILABLE",
-    },
 
-    lockedUntil: {
-      type: DataTypes.DATE,
-      allowNull: true,
+      allowNull: false,
+
+      defaultValue: "available",
     },
   },
+
   {
     sequelize,
-    modelName: "Seat",
+
     tableName: "seats",
+
     timestamps: true,
+
+    indexes: [
+      {
+        unique: true,
+
+        fields: [
+          "showId",
+          "seatNumber",
+        ],
+      },
+    ],
   }
 );
 

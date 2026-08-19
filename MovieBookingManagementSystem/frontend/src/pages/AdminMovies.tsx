@@ -1,441 +1,192 @@
+import { Edit3, Plus, Search, Star, Trash2, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import AdminNav from "../components/AdminNav";
+import { api } from "../lib/api";
+import type { Movie } from "../lib/api";
 
-import { useEffect, useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { api } from "../services/api";
+const emptyForm = { title: "", description: "", genre: "", duration: "", rating: "", image: "" };
 
 const AdminMovies = () => {
-  const navigate = useNavigate();
-
-  const [movies, setMovies] = useState<any[]>([]);
+  const [movies, setMovies] = useState<Movie[]>([]);
   const [search, setSearch] = useState("");
-
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [duration, setDuration] = useState("");
-  const [language, setLanguage] = useState("");
-  const [posterUrl, setPosterUrl] = useState("");
-
-  const [editingMovieId, setEditingMovieId] =
-    useState<number | null>(null);
-
-  const [editTitle, setEditTitle] = useState("");
-  const [editDescription, setEditDescription] =
-    useState("");
-  const [editDuration, setEditDuration] =
-    useState("");
-  const [editLanguage, setEditLanguage] =
-    useState("");
-  const [editPosterUrl, setEditPosterUrl] =
-    useState("");
-
-  const [message, setMessage] = useState("");
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Movie | null>(null);
+  const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const loadMovies = async () => {
-    try {
-      const data = await api("/movies");
-
-      setMovies(data.movies || data || []);
-    } catch (error: any) {
-      console.error(error);
-
-      setError(
-        error.message || "Failed to load movies"
-      );
-    }
+  const load = async () => {
+    const response = await api.get("/movies");
+    setMovies(response.data.movies ?? []);
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
+    void load().catch((requestError: any) => {
+      setError(requestError?.response?.data?.message ?? "Unable to load movies.");
+    });
+  }, []);
 
-    if (!token) {
-      navigate({
-        to: "/login",
-      });
-
-      return;
-    }
-
-    loadMovies();
-  }, [navigate]);
-
-  const addMovie = async () => {
-    setError("");
-    setMessage("");
-
-    if (
-      !title ||
-      !description ||
-      !duration ||
-      !language
-    ) {
-      setError("Please fill all required fields");
-      return;
-    }
-
-    try {
-      await api("/movies", {
-        method: "POST",
-        body: JSON.stringify({
-          title,
-          description,
-          duration: Number(duration),
-          language,
-          posterUrl,
-        }),
-      });
-
-      setMessage("Movie added successfully");
-
-      setTitle("");
-      setDescription("");
-      setDuration("");
-      setLanguage("");
-      setPosterUrl("");
-
-      await loadMovies();
-    } catch (error: any) {
-      console.error(error);
-
-      setError(
-        error.message || "Failed to add movie"
-      );
-    }
-  };
-
-  const startEdit = (movie: any) => {
-    setEditingMovieId(movie.id);
-
-    setEditTitle(movie.title || "");
-    setEditDescription(movie.description || "");
-    setEditDuration(
-      String(movie.duration || "")
-    );
-    setEditLanguage(movie.language || "");
-    setEditPosterUrl(movie.posterUrl || "");
-
-    setError("");
-    setMessage("");
-  };
-
-  const updateMovie = async () => {
-    if (editingMovieId === null) {
-      return;
-    }
-
-    setError("");
-    setMessage("");
-
-    try {
-      await api(`/movies/${editingMovieId}`, {
-        method: "PUT",
-        body: JSON.stringify({
-          title: editTitle,
-          description: editDescription,
-          duration: Number(editDuration),
-          language: editLanguage,
-          posterUrl: editPosterUrl,
-        }),
-      });
-
-      setMessage("Movie updated successfully");
-
-      setEditingMovieId(null);
-
-      await loadMovies();
-    } catch (error: any) {
-      console.error(error);
-
-      setError(
-        error.message || "Failed to update movie"
-      );
-    }
-  };
-
-  const deleteMovie = async (movieId: number) => {
-    const confirmed = window.confirm(
-      "Are you sure you want to delete this movie?"
-    );
-
-    if (!confirmed) {
-      return;
-    }
-
-    setError("");
-    setMessage("");
-
-    try {
-      await api(`/movies/${movieId}`, {
-        method: "DELETE",
-      });
-
-      setMovies((currentMovies) =>
-        currentMovies.filter(
-          (movie) => movie.id !== movieId
-        )
-      );
-
-      setMessage("Movie deleted successfully");
-    } catch (error: any) {
-      console.error(error);
-
-      setError(
-        error.message || "Failed to delete movie"
-      );
-    }
-  };
-
-  const filteredMovies = movies.filter(
-    (movie) =>
-      movie.title
-        ?.toLowerCase()
-        .includes(search.toLowerCase())
+  const filtered = useMemo(
+    () => movies.filter((movie) => movie.title.toLowerCase().includes(search.toLowerCase())),
+    [movies, search]
   );
 
+  const openCreate = () => {
+    setEditing(null);
+    setForm(emptyForm);
+    setFormOpen(true);
+  };
+
+  const openEdit = (movie: Movie) => {
+    setEditing(movie);
+    setForm({
+      title: movie.title,
+      description: movie.description,
+      genre: movie.genre,
+      duration: String(movie.duration),
+      rating: String(movie.rating),
+      image: movie.image,
+    });
+    setFormOpen(true);
+  };
+
+  const save = async () => {
+    setError("");
+
+    if (!form.title || !form.description || !form.genre || !form.duration || !form.rating || !form.image) {
+      setError("All movie fields are required.");
+      return;
+    }
+
+    const duration = Number(form.duration);
+    const rating = Number(form.rating);
+
+    if (!Number.isInteger(duration) || duration <= 0 || Number.isNaN(rating) || rating < 0 || rating > 10) {
+      setError("Duration must be positive minutes and rating must be between 0 and 10.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      const payload = { ...form, duration, rating };
+
+      if (editing) {
+        await api.put(`/movies/${editing.id}`, payload);
+      } else {
+        await api.post("/movies", payload);
+      }
+
+      await load();
+      setFormOpen(false);
+    } catch (requestError: any) {
+      setError(requestError?.response?.data?.message ?? "Unable to save movie.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const remove = async (id: number) => {
+    if (!window.confirm("Delete this movie from the database?")) return;
+
+    try {
+      await api.delete(`/movies/${id}`);
+      await load();
+    } catch (requestError: any) {
+      setError(requestError?.response?.data?.message ?? "Unable to delete movie.");
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 px-6 py-10">
-
-      <div className="mx-auto max-w-5xl">
-
-        <h1 className="mb-8 text-3xl font-bold">
-          Admin Movies
-        </h1>
-
-        {error && (
-          <p className="mb-4 text-red-600">
-            {error}
-          </p>
-        )}
-
-        {message && (
-          <p className="mb-4 text-green-600">
-            {message}
-          </p>
-        )}
-
-        {/* ADD MOVIE */}
-
-        <div className="mb-8 rounded-xl bg-white p-6 shadow">
-
-          <h2 className="mb-5 text-xl font-bold">
-            Add Movie
-          </h2>
-
-          <div className="space-y-4">
-
-            <input
-              value={title}
-              onChange={(e) =>
-                setTitle(e.target.value)
-              }
-              placeholder="Movie title"
-              className="w-full rounded-lg border p-3"
-            />
-
-            <textarea
-              value={description}
-              onChange={(e) =>
-                setDescription(e.target.value)
-              }
-              placeholder="Movie description"
-              className="w-full rounded-lg border p-3"
-            />
-
-            <input
-              type="number"
-              value={duration}
-              onChange={(e) =>
-                setDuration(e.target.value)
-              }
-              placeholder="Duration in minutes"
-              className="w-full rounded-lg border p-3"
-            />
-
-            <input
-              value={language}
-              onChange={(e) =>
-                setLanguage(e.target.value)
-              }
-              placeholder="Language"
-              className="w-full rounded-lg border p-3"
-            />
-
-            <input
-              value={posterUrl}
-              onChange={(e) =>
-                setPosterUrl(e.target.value)
-              }
-              placeholder="Poster URL"
-              className="w-full rounded-lg border p-3"
-            />
-
-            <button
-              onClick={addMovie}
-              className="rounded-lg bg-black px-5 py-3 text-white hover:bg-gray-800"
-            >
-              Add Movie
-            </button>
-
+    <div className="min-h-screen bg-slate-950 text-white">
+      <AdminNav current="movies" />
+      <section className="border-b border-white/10 bg-white/[0.02]">
+        <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+          <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-400">Admin Panel</p>
+              <h1 className="mt-3 text-4xl font-black">Manage Movies</h1>
+              <p className="mt-3 text-sm text-slate-400">No local movie array or seed data is used here.</p>
+            </div>
+            <button onClick={openCreate} type="button" className="inline-flex items-center justify-center gap-2 rounded-xl bg-violet-600 px-5 py-3 text-sm font-semibold hover:bg-violet-500"><Plus size={18} />Add Movie</button>
           </div>
         </div>
+      </section>
 
-        {/* SEARCH */}
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        {error && <div className="mb-6 rounded-xl border border-red-500/20 bg-red-500/10 p-4 text-sm text-red-300">{error}</div>}
 
-        <input
-          value={search}
-          onChange={(e) =>
-            setSearch(e.target.value)
-          }
-          placeholder="Search movie..."
-          className="mb-6 w-full rounded-lg border p-3"
-        />
+        <div className="mb-8 flex items-center rounded-2xl border border-white/10 bg-white/[0.03] p-2">
+          <Search size={19} className="ml-3 text-slate-500" />
+          <input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search movies..." className="min-w-0 flex-1 bg-transparent px-3 py-3 text-sm outline-none" />
+        </div>
 
-        {/* EDIT */}
+        {filtered.length === 0 ? (
+          <div className="rounded-3xl border border-white/10 bg-white/[0.03] py-20 text-center text-slate-500">No movie records found.</div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {filtered.map((movie) => (
+              <article key={movie.id} className="overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03]">
+                <img src={movie.image} alt={movie.title} className="h-64 w-full object-cover" />
+                <div className="p-5">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-xl font-bold">{movie.title}</h2>
+                      <p className="mt-1 text-sm text-violet-300">{movie.genre}</p>
+                    </div>
+                    <span className="flex items-center gap-1 text-sm text-amber-300"><Star size={14} fill="currentColor" />{Number(movie.rating).toFixed(1)}</span>
+                  </div>
+                  <p className="mt-3 line-clamp-3 text-sm text-slate-500">{movie.description}</p>
+                  <p className="mt-3 text-xs text-slate-600">{movie.duration} minutes • ID {movie.id}</p>
+                  <div className="mt-5 grid grid-cols-2 gap-3">
+                    <button onClick={() => openEdit(movie)} type="button" className="flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-sm font-semibold hover:bg-white/10"><Edit3 size={16} />Edit</button>
+                    <button onClick={() => void remove(movie.id)} type="button" className="flex items-center justify-center gap-2 rounded-xl bg-red-500/10 py-3 text-sm font-semibold text-red-300 hover:bg-red-500/20"><Trash2 size={16} />Delete</button>
+                  </div>
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
+      </main>
 
-        {editingMovieId !== null && (
-          <div className="mb-8 rounded-xl bg-white p-6 shadow">
+      {formOpen && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm">
+          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-3xl border border-white/10 bg-slate-900 p-6">
+            <div className="flex items-center justify-between">
+              <div><p className="text-xs uppercase tracking-wider text-violet-400">Movie Management</p><h2 className="mt-1 text-2xl font-black">{editing ? "Edit Movie" : "Add Movie"}</h2></div>
+              <button type="button" onClick={() => setFormOpen(false)} className="rounded-xl p-2 text-slate-500 hover:bg-white/10 hover:text-white"><X size={20} /></button>
+            </div>
 
-            <h2 className="mb-5 text-xl font-bold">
-              Edit Movie
-            </h2>
+            <div className="mt-7 space-y-4">
+              {[
+                ["title", "Title", "text"],
+                ["genre", "Genre", "text"],
+                ["duration", "Duration (minutes)", "number"],
+                ["rating", "Rating (0-10)", "number"],
+                ["image", "Image URL", "url"],
+              ].map(([key, label, type]) => (
+                <div key={key}>
+                  <label className="text-sm font-medium text-slate-300">{label}</label>
+                  <input
+                    type={type}
+                    value={form[key as keyof typeof form]}
+                    onChange={(event) => setForm((current) => ({ ...current, [key]: event.target.value }))}
+                    className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-violet-500"
+                  />
+                </div>
+              ))}
 
-            <div className="space-y-4">
-
-              <input
-                value={editTitle}
-                onChange={(e) =>
-                  setEditTitle(e.target.value)
-                }
-                placeholder="Movie title"
-                className="w-full rounded-lg border p-3"
-              />
-
-              <textarea
-                value={editDescription}
-                onChange={(e) =>
-                  setEditDescription(
-                    e.target.value
-                  )
-                }
-                placeholder="Description"
-                className="w-full rounded-lg border p-3"
-              />
-
-              <input
-                type="number"
-                value={editDuration}
-                onChange={(e) =>
-                  setEditDuration(
-                    e.target.value
-                  )
-                }
-                placeholder="Duration"
-                className="w-full rounded-lg border p-3"
-              />
-
-              <input
-                value={editLanguage}
-                onChange={(e) =>
-                  setEditLanguage(
-                    e.target.value
-                  )
-                }
-                placeholder="Language"
-                className="w-full rounded-lg border p-3"
-              />
-
-              <input
-                value={editPosterUrl}
-                onChange={(e) =>
-                  setEditPosterUrl(
-                    e.target.value
-                  )
-                }
-                placeholder="Poster URL"
-                className="w-full rounded-lg border p-3"
-              />
-
-              <div className="flex gap-3">
-
-                <button
-                  onClick={updateMovie}
-                  className="rounded-lg bg-green-600 px-5 py-2 text-white"
-                >
-                  Save Changes
-                </button>
-
-                <button
-                  onClick={() =>
-                    setEditingMovieId(null)
-                  }
-                  className="rounded-lg border px-5 py-2"
-                >
-                  Cancel
-                </button>
-
+              <div>
+                <label className="text-sm font-medium text-slate-300">Description</label>
+                <textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} rows={4} className="mt-2 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm outline-none focus:border-violet-500" />
               </div>
 
+              <button disabled={saving} type="button" onClick={() => void save()} className="w-full rounded-xl bg-violet-600 py-3.5 text-sm font-semibold hover:bg-violet-500 disabled:opacity-60">
+                {saving ? "Saving..." : editing ? "Update Movie" : "Create Movie"}
+              </button>
             </div>
           </div>
-        )}
-
-        {/* MOVIE LIST */}
-
-        <div className="space-y-4">
-
-          {filteredMovies.length === 0 ? (
-            <p className="text-gray-500">
-              No movies found.
-            </p>
-          ) : (
-            filteredMovies.map((movie) => (
-              <div
-                key={movie.id}
-                className="rounded-xl bg-white p-5 shadow"
-              >
-
-                <h3 className="text-xl font-bold">
-                  {movie.title}
-                </h3>
-
-                <p className="mt-2 text-gray-600">
-                  {movie.description}
-                </p>
-
-                <p className="mt-2 text-sm">
-                  {movie.language} •{" "}
-                  {movie.duration} minutes
-                </p>
-
-                <div className="mt-4 flex gap-3">
-
-                  <button
-                    onClick={() =>
-                      startEdit(movie)
-                    }
-                    className="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
-                  >
-                    Edit
-                  </button>
-
-                  <button
-                    onClick={() =>
-                      deleteMovie(movie.id)
-                    }
-                    className="rounded-lg bg-red-600 px-4 py-2 text-white hover:bg-red-700"
-                  >
-                    Delete
-                  </button>
-
-                </div>
-
-              </div>
-            ))
-          )}
-
         </div>
-
-      </div>
+      )}
     </div>
   );
 };

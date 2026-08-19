@@ -1,7 +1,35 @@
-import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import {
+  DataTypes,
+  Model,
+  Optional,
+} from "sequelize";
 
-class Show extends Model {}
+import sequelize from "../config/database.js";
+
+interface ShowAttributes {
+  id: number;
+  movieId: number;
+  theaterId: number;
+  showTime: Date;
+  price: number;
+}
+
+interface ShowCreationAttributes
+  extends Optional<ShowAttributes, "id"> {}
+
+class Show
+  extends Model<
+    ShowAttributes,
+    ShowCreationAttributes
+  >
+  implements ShowAttributes
+{
+  declare id: number;
+  declare movieId: number;
+  declare theaterId: number;
+  declare showTime: Date;
+  declare price: number;
+}
 
 Show.init(
   {
@@ -16,13 +44,13 @@ Show.init(
       allowNull: false,
     },
 
-    showDate: {
-      type: DataTypes.DATEONLY,
+    theaterId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
 
     showTime: {
-      type: DataTypes.TIME,
+      type: DataTypes.DATE,
       allowNull: false,
     },
 
@@ -31,6 +59,7 @@ Show.init(
       allowNull: false,
     },
   },
+
   {
     sequelize,
     tableName: "shows",

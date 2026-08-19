@@ -1,7 +1,41 @@
-import { DataTypes, Model } from "sequelize";
-import sequelize from "../config/database";
+import {
+  DataTypes,
+  Model,
+  Optional,
+} from "sequelize";
 
-class Booking extends Model {}
+import sequelize from "../config/database.js";
+
+interface BookingAttributes {
+  id: number;
+  userId: number;
+  showId: number;
+  seatId: number;
+  status: "confirmed" | "cancelled";
+}
+
+interface BookingCreationAttributes
+  extends Optional<
+    BookingAttributes,
+    "id" | "status"
+  > {}
+
+class Booking
+  extends Model<
+    BookingAttributes,
+    BookingCreationAttributes
+  >
+  implements BookingAttributes
+{
+  declare id: number;
+  declare userId: number;
+  declare showId: number;
+  declare seatId: number;
+
+  declare status:
+    | "confirmed"
+    | "cancelled";
+}
 
 Booking.init(
   {
@@ -21,34 +55,37 @@ Booking.init(
       allowNull: false,
     },
 
-    seatIds: {
-      type: DataTypes.JSONB,
-      allowNull: false,
-    },
-
-    totalAmount: {
-      type: DataTypes.DECIMAL(10, 2),
+    seatId: {
+      type: DataTypes.INTEGER,
       allowNull: false,
     },
 
     status: {
       type: DataTypes.ENUM(
-        "CONFIRMED",
-        "CANCELLED"
+        "confirmed",
+        "cancelled"
       ),
-      defaultValue: "CONFIRMED",
-    },
-
-    bookingReference: {
-      type: DataTypes.STRING,
       allowNull: false,
-      unique: true,
+      defaultValue: "confirmed",
     },
   },
   {
     sequelize,
     tableName: "bookings",
     timestamps: true,
+
+    indexes: [
+      {
+        unique: true,
+        fields: [
+          "showId",
+          "seatId",
+        ],
+        where: {
+          status: "confirmed",
+        },
+      },
+    ],
   }
 );
 
