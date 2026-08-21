@@ -34,15 +34,18 @@ import bookingRoutes from "./routes/bookingRoutes.js";
 const app = Fastify({logger: true,});
 
 // CORS
+const allowedOrigin = process.env.CORS_ORIGIN;
 app.register(cors, {
-  origin: true,
-  methods: ["GET","HEAD","POST","PUT","PATCH","DELETE","OPTIONS"],
-  allowedHeaders: ["Content-Type","Authorization"],
+  origin: allowedOrigin ? (allowedOrigin === "*" ? true : allowedOrigin.split(",")) : true,
+  methods: ["GET", "HEAD", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+  credentials: true,
 });
 
 // JWT
 app.register(jwt, {
   secret:
+    process.env.JWT_SECRET ||
     "movie-booking-secret-key-change-this-later",
 });
 
@@ -115,8 +118,9 @@ const start = async () => {
     console.log("✅ Database tables synchronized");
 
     // START SERVER
-    await app.listen({port: 5050,host: "0.0.0.0",});
-    console.log("🚀 Server running on http://localhost:5050");
+    const PORT = Number(process.env.PORT) || 5050;
+    await app.listen({ port: PORT, host: "0.0.0.0" });
+    console.log(`🚀 Server running on port ${PORT}`);
 
   } catch (error) {
     console.error("❌ Server startup error:",error);
