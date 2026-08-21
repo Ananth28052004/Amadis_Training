@@ -46,7 +46,6 @@ export const registerUser = async (
       password,
       role: "user",
     });
-
     return reply.code(201).send({
       message: "Registration successful",
       user: {

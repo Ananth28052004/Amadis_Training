@@ -1,30 +1,10 @@
 
-import {
-  FastifyInstance,
-  FastifyReply,
-  FastifyRequest,
-} from "fastify";
+import {FastifyInstance,FastifyReply,FastifyRequest,} from "fastify";
+import {createBooking,cancelBooking,getMyBookings,getBookingById,getAllBookings,adminCancelBooking,
+  getBookingStats,getAdminDashboard,getConfirmedBookings,getCancelledBookings,
+  getBookingsByShow,getShowSeatStatus,adminDeleteBooking} from "../controllers/bookingController.js";
 
-import {
-  createBooking,
-  cancelBooking,
-  getMyBookings,
-  getBookingById,
-  getAllBookings,
-  adminCancelBooking,
-  getBookingStats,
-  getAdminDashboard,
-  getConfirmedBookings,
-  getCancelledBookings,
-  getBookingsByShow,
-  getShowSeatStatus,
-  adminDeleteBooking,
-} from "../controllers/bookingController.js";
-
-// =====================================
 // AUTHENTICATION
-// =====================================
-
 const authenticate = async (
   request: FastifyRequest,
   reply: FastifyReply
@@ -39,112 +19,73 @@ const authenticate = async (
   }
 };
 
-// =====================================
 // BOOKING ROUTES
-// =====================================
-
 const bookingRoutes = async (
   app: FastifyInstance
 ) => {
 
-  // ===================================
-  // CREATE BOOKING
-  // POST /api/bookings
-  // ===================================
-
-  app.post(
-    "/",
+  // CREATE BOOKING  POST /api/bookings
+  app.post("/",
     {
       preHandler: authenticate,
     },
     createBooking
   );
 
-  // ===================================
-  // GET MY BOOKINGS
-  // GET /api/bookings/my
-  // ===================================
-
-  app.get(
-    "/my",
+  // GET MY BOOKINGS GET /api/bookings/my
+  app.get("/my",
     {
       preHandler: authenticate,
     },
     getMyBookings
   );
+  // GET ALL BOOKINGS GET /api/bookings/all
 
-  // ===================================
-  // GET ALL BOOKINGS
-  // GET /api/bookings/all
-  // ===================================
-
-  app.get(
-    "/all",
+  app.get("/all",
     {
       preHandler: authenticate,
     },
     getAllBookings
   );
 
-  // ===================================
   // ADMIN DASHBOARD
   // GET /api/bookings/admin/dashboard
-  // ===================================
-
-  app.get(
-    "/admin/dashboard",
+  app.get("/admin/dashboard",
     {
       preHandler: authenticate,
     },
     getAdminDashboard
   );
 
-  // ===================================
   // ADMIN BOOKING STATS
   // GET /api/bookings/admin/stats
-  // ===================================
-
-  app.get(
-    "/admin/stats",
+  app.get("/admin/stats",
     {
       preHandler: authenticate,
     },
     getBookingStats
   );
 
-  // ===================================
   // ADMIN CANCEL BOOKING
   // PATCH /api/bookings/admin/:id/cancel
-  // ===================================
-
-  app.patch(
-    "/admin/:id/cancel",
+  app.patch("/admin/:id/cancel",
     {
       preHandler: authenticate,
     },
     adminCancelBooking
   );
-
-  // ===================================
   // GET BOOKING BY ID
   // GET /api/bookings/:id
-  // ===================================
-
-  app.get(
-    "/:id",
+  app.get("/:id",
     {
       preHandler: authenticate,
     },
     getBookingById
   );
 
-  // ===================================
   // CANCEL OWN BOOKING
   // DELETE /api/bookings/:id
-  // ===================================
-
-  app.delete(
-    "/:id",
+  app.delete("/:id",
     {
       preHandler: authenticate,
     },
@@ -152,77 +93,51 @@ const bookingRoutes = async (
   );
 
 
-// ===================================
 // GET CONFIRMED BOOKINGS
-// ADMIN ONLY
 // GET /api/bookings/admin/confirmed
-// ===================================
-
-app.get(
-  "/admin/confirmed",
+app.get("/admin/confirmed",
   {
     preHandler: authenticate,
   },
   getConfirmedBookings
 );
 
-// ===================================
-// GET CANCELLED BOOKINGS
-// ADMIN ONLY
-// GET /api/bookings/admin/cancelled
-// ===================================
-
-app.get(
-  "/admin/cancelled",
+// GET CANCELLED BOOKINGS GET /api/bookings/admin/cancelled
+app.get("/admin/cancelled",
   {
     preHandler: authenticate,
   },
   getCancelledBookings
 );
 
-// ===================================
 // GET BOOKINGS BY SHOW
-// ADMIN ONLY
 // GET /api/bookings/admin/show/:showId
-// ===================================
-
-app.get(
-  "/admin/show/:showId",
+app.get("/admin/show/:showId",
   {
     preHandler: authenticate,
   },
   getBookingsByShow
 );
 
-// ===================================
 // GET SHOW SEAT STATUS
-// ADMIN ONLY
 // GET /api/bookings/admin/show/:showId/seats
-// ===================================
 
-app.get(
-  "/admin/show/:showId/seats",
+app.get("/admin/show/:showId/seats",
   {
     preHandler: authenticate,
   },
   getShowSeatStatus
 );
 
-// ===================================
 // DELETE BOOKING
-// ADMIN ONLY
 // DELETE /api/bookings/admin/:id
-// ===================================
 
-app.delete(
-  "/admin/:id",
+app.delete("/admin/:id",
   {
     preHandler: authenticate,
   },
   adminDeleteBooking
 );
-
-
 };
 
 export default bookingRoutes;

@@ -31,73 +31,37 @@ import theaterRoutes from "./routes/theaterRoutes.js";
 import showRoutes from "./routes/showRoutes.js";
 import seatRoutes from "./routes/seatRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
+const app = Fastify({logger: true,});
 
-// =====================================
-// FASTIFY APP
-// =====================================
-
-const app = Fastify({
-  logger: true,
-});
-
-// =====================================
 // CORS
-// =====================================
-
 app.register(cors, {
   origin: true,
-  methods: [
-    "GET",
-    "HEAD",
-    "POST",
-    "PUT",
-    "PATCH",
-    "DELETE",
-    "OPTIONS",
-  ],
-  allowedHeaders: [
-    "Content-Type",
-    "Authorization",
-  ],
+  methods: ["GET","HEAD","POST","PUT","PATCH","DELETE","OPTIONS"],
+  allowedHeaders: ["Content-Type","Authorization"],
 });
 
-// =====================================
 // JWT
-// =====================================
-
 app.register(jwt, {
   secret:
     "movie-booking-secret-key-change-this-later",
 });
 
-// =====================================
 // AUTH ROUTES
-// =====================================
-
 app.register(authRoutes, {
   prefix: "/api/auth",
 });
 
-// =====================================
 // MOVIE ROUTES
-// =====================================
-
 app.register(movieRoutes, {
   prefix: "/api/movies",
 });
 
-// =====================================
 // THEATER ROUTES
-// =====================================
-
 app.register(theaterRoutes, {
   prefix: "/api/theaters",
 });
 
-// =====================================
 // SHOW ROUTES
-// =====================================
-
 app.register(showRoutes, {
   prefix: "/api/shows",
 });
@@ -106,26 +70,18 @@ app.register(adminRoutes, {
   prefix: "/api/admin",
 });
 
-// =====================================
-// SEAT ROUTES
-// =====================================
 
+// SEAT ROUTES
 app.register(seatRoutes, {
   prefix: "/api/seats",
 });
 
-// =====================================
 // BOOKING ROUTES
-// =====================================
-
 app.register(bookingRoutes, {
   prefix: "/api/bookings",
 });
 
-// =====================================
 // TEST ROUTE
-// =====================================
-
 app.get("/api/health", async () => ({
   ok: true,
   service: "cinebook-backend",
@@ -139,93 +95,33 @@ app.get("/", async () => {
   };
 });
 
-// =====================================
 // START SERVER
-// =====================================
-
 const start = async () => {
   try {
-
-    // =================================
     // CONNECT DATABASE
-    // =================================
-
     await sequelize.authenticate();
+    console.log("✅ PostgreSQL connected successfully");
 
-    console.log(
-      "✅ PostgreSQL connected successfully"
-    );
-
-    // =================================
     // CHECK MODELS
-    // =================================
+    console.log("User table:",User.tableName);
+    console.log("Movie table:",Movie.tableName);
+    console.log("Theater table:",Theater.tableName);
+    console.log("Show table:",Show.tableName);
+    console.log("Seat table:",Seat.tableName);
+    console.log("Booking table:",Booking.tableName);
 
-    console.log(
-      "User table:",
-      User.tableName
-    );
-
-    console.log(
-      "Movie table:",
-      Movie.tableName
-    );
-
-    console.log(
-      "Theater table:",
-      Theater.tableName
-    );
-
-    console.log(
-      "Show table:",
-      Show.tableName
-    );
-
-    console.log(
-      "Seat table:",
-      Seat.tableName
-    );
-
-    console.log(
-      "Booking table:",
-      Booking.tableName
-    );
-
-    // =================================
     // SYNCHRONIZE DATABASE
-    // =================================
-
     await sequelize.sync({ alter: true });
+    console.log("✅ Database tables synchronized");
 
-    console.log(
-      "✅ Database tables synchronized"
-    );
-
-    // =================================
     // START SERVER
-    // =================================
-
-    await app.listen({
-      port: 5050,
-      host: "0.0.0.0",
-    });
-
-    console.log(
-      "🚀 Server running on http://localhost:5050"
-    );
+    await app.listen({port: 5050,host: "0.0.0.0",});
+    console.log("🚀 Server running on http://localhost:5050");
 
   } catch (error) {
-
-    console.error(
-      "❌ Server startup error:",
-      error
-    );
-
+    console.error("❌ Server startup error:",error);
     process.exit(1);
   }
 };
-
-// =====================================
 // START APPLICATION
-// =====================================
-
 start();

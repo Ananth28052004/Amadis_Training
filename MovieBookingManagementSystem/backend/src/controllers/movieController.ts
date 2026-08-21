@@ -1,63 +1,15 @@
-import {
-  FastifyReply,
-  FastifyRequest,
-} from "fastify";
-
+import {FastifyReply,FastifyRequest,}from "fastify";
 import Movie from "../models/Movie.js";
 import Show from "../models/Show.js";
 import Theater from "../models/Theater.js";
 
-// =====================================
-// ADMIN CHECK
-// =====================================
-
-const checkAdmin = (
-  request: FastifyRequest,
-  reply: FastifyReply
-) => {
-  const user = request.user as {
-    id: number;
-    role: string;
-  };
-
-  if (!user || !user.id) {
-    reply.code(401).send({
-      message:
-        "Unauthorized. Please login first.",
-    });
-
-    return false;
-  }
-
-  if (user.role !== "admin") {
-    reply.code(403).send({
-      message:
-        "Access denied. Admin only.",
-    });
-
-    return false;
-  }
-
-  return true;
-};
-
-
-
-// =====================================
-// CREATE MOVIE
-// ADMIN ONLY
 // POST /api/movies
-// =====================================
-
 export const createMovie = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
     // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -70,10 +22,7 @@ export const createMovie = async (
       });
     }
 
-    // =================================
     // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -81,18 +30,8 @@ export const createMovie = async (
       });
     }
 
-    // =================================
     // GET REQUEST BODY
-    // =================================
-
-    const {
-      title,
-      description,
-      genre,
-      duration,
-      rating,
-      image,
-    } = request.body as {
+    const {title,description,genre,duration,rating,image} = request.body as {
       title: string;
       description: string;
       genre: string;
@@ -105,41 +44,24 @@ export const createMovie = async (
     // VALIDATION
     // =================================
 
-    if (
-      !title ||
-      !description ||
-      !genre ||
-      !image
-    ) {
+    if (!title ||!description || !genre ||!image) {
       return reply.code(400).send({
         message:
           "title, description and genre are required",
       });
     }
 
-    const parsedDuration =
-      Number(duration);
+    const parsedDuration =Number(duration);
+    const parsedRating =Number(rating);
 
-    const parsedRating =
-      Number(rating);
-
-    if (
-      !Number.isInteger(
-        parsedDuration
-      ) ||
-      parsedDuration <= 0
-    ) {
+    if (!Number.isInteger(parsedDuration) || parsedDuration <= 0) {
       return reply.code(400).send({
         message:
           "Duration must be a positive integer",
       });
     }
 
-    if (
-      Number.isNaN(parsedRating) ||
-      parsedRating < 0 ||
-      parsedRating > 10
-    ) {
+    if (Number.isNaN(parsedRating) || parsedRating < 0 ||parsedRating > 10) {
       return reply.code(400).send({
         message:
           "Rating must be between 0 and 10",
@@ -165,23 +87,15 @@ export const createMovie = async (
     // =================================
 
     return reply.code(201).send({
-      message:
-        "Movie created successfully",
-
+      message:"Movie created successfully",
       movie,
     });
 
   } catch (error: any) {
 
-    console.error(
-      "❌ CREATE MOVIE ERROR:",
-      error
-    );
-
+    console.error("❌ CREATE MOVIE ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to create movie",
-
+      message:"Failed to create movie",
       error: error.message,
     });
   }
@@ -199,35 +113,20 @@ export const getMovies = async (
   reply: FastifyReply
 ) => {
   try {
-
     const movies =
       await Movie.findAll({
-        order: [
-          ["createdAt", "DESC"],
-        ],
+        order: [["createdAt", "DESC"],]
       });
 
     return reply.send({
-      message:
-        "Movies fetched successfully",
-
-      totalMovies:
-        movies.length,
-
-      movies,
+      message:"Movies fetched successfully",
+      totalMovies:movies.length,movies,
     });
-
-  } catch (error: any) {
-
-    console.error(
-      "❌ GET MOVIES ERROR:",
-      error
-    );
-
+  } 
+  catch (error: any) {
+    console.error("❌ GET MOVIES ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to get movies",
-
+      message:"Failed to get movies",
       error: error.message,
     });
   }
@@ -244,29 +143,17 @@ export const getMovie = async (
   reply: FastifyReply
 ) => {
   try {
+    const { id } =request.params as {id: string;};
+    const movieId =Number(id);
 
-    const { id } =
-      request.params as {
-        id: string;
-      };
-
-    const movieId =
-      Number(id);
-
-    if (
-      !Number.isInteger(movieId) ||
-      movieId <= 0
-    ) {
+    if (!Number.isInteger(movieId) ||movieId <= 0) {
       return reply.code(400).send({
         message:
           "Valid movie id is required",
       });
     }
 
-    const movie =
-      await Movie.findByPk(
-        movieId
-      );
+    const movie =await Movie.findByPk(movieId);
 
     if (!movie) {
       return reply.code(404).send({
@@ -278,34 +165,20 @@ export const getMovie = async (
     return reply.send({
       message:
         "Movie fetched successfully",
-
       movie,
     });
 
-  } catch (error: any) {
-
-    console.error(
-      "❌ GET MOVIE ERROR:",
-      error
-    );
-
+  } 
+  catch (error: any) {
+    console.error("❌ GET MOVIE ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to get movie",
-
+      message:"Failed to get movie",
       error: error.message,
     });
   }
 };
 
-
-
-// =====================================
-// UPDATE MOVIE
-// ADMIN ONLY
 // PUT /api/movies/:id
-// =====================================
-
 export const updateMovie = async (
   request: FastifyRequest,
   reply: FastifyReply
@@ -327,10 +200,7 @@ export const updateMovie = async (
       });
     }
 
-    // =================================
     // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -348,20 +218,14 @@ export const updateMovie = async (
 
     const movieId = Number(id);
 
-    if (
-      !Number.isInteger(movieId) ||
-      movieId <= 0
-    ) {
+    if (!Number.isInteger(movieId) ||movieId <= 0) {
       return reply.code(400).send({
         message:
           "Valid movie id is required",
       });
     }
 
-    // =================================
     // FIND MOVIE
-    // =================================
-
     const movie =
       await Movie.findByPk(movieId);
 
@@ -372,18 +236,8 @@ export const updateMovie = async (
       });
     }
 
-    // =================================
     // GET BODY
-    // =================================
-
-    const {
-      title,
-      description,
-      genre,
-      duration,
-      rating,
-      image,
-    } = request.body as {
+    const {title,description,genre,duration,rating,image,} = request.body as {
       title?: string;
       description?: string;
       genre?: string;
@@ -392,18 +246,12 @@ export const updateMovie = async (
       image?: string;
     };
 
-    // =================================
     // VALIDATE DURATION
-    // =================================
-
     if (duration !== undefined) {
       const parsedDuration =
         Number(duration);
 
-      if (
-        !Number.isInteger(parsedDuration) ||
-        parsedDuration <= 0
-      ) {
+      if (!Number.isInteger(parsedDuration) ||parsedDuration <= 0) {
         return reply.code(400).send({
           message:
             "Duration must be a positive integer",
@@ -411,19 +259,12 @@ export const updateMovie = async (
       }
     }
 
-    // =================================
     // VALIDATE RATING
-    // =================================
-
     if (rating !== undefined) {
       const parsedRating =
         Number(rating);
 
-      if (
-        Number.isNaN(parsedRating) ||
-        parsedRating < 0 ||
-        parsedRating > 10
-      ) {
+      if (Number.isNaN(parsedRating) ||parsedRating < 0 ||parsedRating > 10) {
         return reply.code(400).send({
           message:
             "Rating must be between 0 and 10",
@@ -431,10 +272,7 @@ export const updateMovie = async (
       }
     }
 
-    // =================================
     // UPDATE MOVIE
-    // =================================
-
     await movie.update({
       ...(title !== undefined && {
         title: title.trim(),
@@ -462,56 +300,32 @@ export const updateMovie = async (
       }),
     });
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
-      message:
-        "Movie updated successfully",
-
+      message:"Movie updated successfully",
       movie,
     });
 
-  } catch (error: any) {
-
-    console.error(
-      "❌ UPDATE MOVIE ERROR:",
-      error
-    );
-
+  } 
+  catch (error: any) {
+    console.error("❌ UPDATE MOVIE ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to update movie",
-
+      message:"Failed to update movie",
       error: error.message,
     });
   }
 };
 
-
-
-
-// =====================================
-// DELETE MOVIE
-// ADMIN ONLY
 // DELETE /api/movies/:id
-// =====================================
-
 export const deleteMovie = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
     };
-
     if (!user || !user.id) {
       return reply.code(401).send({
         message:
@@ -519,44 +333,26 @@ export const deleteMovie = async (
       });
     }
 
-    // =================================
     // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
-        message:
-          "Access denied. Admin only.",
+        message:"Access denied. Admin only.",
       });
     }
 
-    // =================================
     // GET MOVIE ID
-    // =================================
-
     const { id } = request.params as {
       id: string;
     };
-
     const movieId = Number(id);
-
-    if (
-      !Number.isInteger(movieId) ||
-      movieId <= 0
-    ) {
+    if (!Number.isInteger(movieId) ||movieId <= 0) {
       return reply.code(400).send({
-        message:
-          "Valid movie id is required",
+        message:"Valid movie id is required",
       });
     }
 
-    // =================================
     // FIND MOVIE
-    // =================================
-
-    const movie =
-      await Movie.findByPk(movieId);
-
+    const movie =await Movie.findByPk(movieId);
     if (!movie) {
       return reply.code(404).send({
         message:
@@ -564,34 +360,18 @@ export const deleteMovie = async (
       });
     }
 
-    // =================================
     // DELETE MOVIE
-    // =================================
-
     await movie.destroy();
-
-    // =================================
-    // RESPONSE
-    // =================================
-
     return reply.send({
-      message:
-        "Movie deleted successfully",
-
+      message:"Movie deleted successfully",
       movieId,
     });
 
-  } catch (error: any) {
-
-    console.error(
-      "❌ DELETE MOVIE ERROR:",
-      error
-    );
-
+  }
+  catch (error: any) {
+    console.error("❌ DELETE MOVIE ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to delete movie",
-
+      message:"Failed to delete movie",
       error: error.message,
     });
   }
@@ -632,26 +412,16 @@ export const getAllMovies = async (
     });
 
     return reply.send({
-      message:
-        "Movies fetched successfully",
-
-      totalMovies:
-        movies.length,
-
+      message:"Movies fetched successfully",
+      totalMovies:movies.length,
       movies,
     });
 
-  } catch (error: any) {
-
-    console.error(
-      "❌ GET ALL MOVIES ERROR:",
-      error
-    );
-
+  } 
+  catch (error: any) {
+    console.error("❌ GET ALL MOVIES ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to fetch movies",
-
+      message:"Failed to fetch movies",
       error: error.message,
     });
   }
@@ -659,44 +429,27 @@ export const getAllMovies = async (
 
 
 
-// =====================================
-// GET MOVIE BY ID
-// PUBLIC
-// GET /api/movies/:id
-// =====================================
 
+// GET /api/movies/:id
 export const getMovieById = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
     // GET MOVIE ID
-    // =================================
-
     const { id } = request.params as {
       id: string;
     };
-
     const movieId = Number(id);
-
-    if (
-      !Number.isInteger(movieId) ||
-      movieId <= 0
-    ) {
+    if (!Number.isInteger(movieId) ||movieId <= 0) {
       return reply.code(400).send({
         message:
           "Valid movie id is required",
       });
     }
 
-    // =================================
     // FIND MOVIE
-    // =================================
-
-    const movie =
-      await Movie.findByPk(movieId);
-
+    const movie =await Movie.findByPk(movieId);
     if (!movie) {
       return reply.code(404).send({
         message:
@@ -704,28 +457,18 @@ export const getMovieById = async (
       });
     }
 
-    // =================================
-    // RESPONSE
-    // =================================
-
     return reply.send({
-      message:
-        "Movie fetched successfully",
-
+      message:"Movie fetched successfully",
       movie,
     });
 
-  } catch (error: any) {
-
-    console.error(
-      "❌ GET MOVIE ERROR:",
-      error
+  } 
+  catch (error: any) {
+    console.error("❌ GET MOVIE ERROR:",error
     );
 
     return reply.code(500).send({
-      message:
-        "Failed to fetch movie",
-
+      message:"Failed to fetch movie",
       error: error.message,
     });
   }

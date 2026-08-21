@@ -1,9 +1,4 @@
-import {
-  DataTypes,
-  Model,
-  Optional,
-} from "sequelize";
-
+import {DataTypes,Model,Optional} from "sequelize";
 import sequelize from "../config/database.js";
 
 interface ShowAttributes {
@@ -13,16 +8,9 @@ interface ShowAttributes {
   showTime: Date;
   price: number;
 }
+interface ShowCreationAttributes extends Optional<ShowAttributes, "id"> {}
 
-interface ShowCreationAttributes
-  extends Optional<ShowAttributes, "id"> {}
-
-class Show
-  extends Model<
-    ShowAttributes,
-    ShowCreationAttributes
-  >
-  implements ShowAttributes
+class Show extends Model<ShowAttributes,ShowCreationAttributes>implements ShowAttributes
 {
   declare id: number;
   declare movieId: number;

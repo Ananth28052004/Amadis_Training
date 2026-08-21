@@ -1,13 +1,6 @@
-import {
-  DataTypes,
-  Model,
-  Optional,
-} from "sequelize";
-
+import {DataTypes,Model,Optional} from "sequelize";
 import sequelize from "../config/database.js";
-
 type UserRole = "user" | "admin";
-
 interface UserAttributes {
   id: number;
   name: string;
@@ -63,8 +56,7 @@ User.init(
       defaultValue: "user",
     },
   },
-  {
-    sequelize,
+  {sequelize,
     tableName: "users",
     timestamps: true,
   }

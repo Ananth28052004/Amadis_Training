@@ -1,12 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import {
-  CalendarDays,
-  Film,
-  LayoutDashboard,
-  MapPin,
-  Ticket,
-} from "lucide-react";
-
+import {CalendarDays,Film,LayoutDashboard,MapPin,Ticket}from "lucide-react";
 interface AdminNavProps {
   current?: "dashboard" | "movies" | "theaters" | "shows" | "bookings";
 }

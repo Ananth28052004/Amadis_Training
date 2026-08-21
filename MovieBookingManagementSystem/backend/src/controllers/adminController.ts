@@ -1,18 +1,12 @@
-import {
-  FastifyReply,
-  FastifyRequest,
+import {FastifyReply,FastifyRequest,
 } from "fastify";
-
 import User from "../models/User.js";
 import Movie from "../models/Movie.js";
 import Theater from "../models/Theater.js";
 import Show from "../models/Show.js";
 import Booking from "../models/Booking.js";
 
-// =====================================
 // ADMIN CHECK
-// =====================================
-
 const checkAdmin = (
   request: FastifyRequest,
   reply: FastifyReply
@@ -43,46 +37,24 @@ const checkAdmin = (
   return true;
 };
 
-// =====================================
 // ADMIN DASHBOARD
-// =====================================
-
 export const getAdminDashboard = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // CHECK ADMIN
-    // =================================
-
     if (!checkAdmin(request, reply)) {
       return;
     }
 
-    // =================================
     // GET COUNTS
-    // =================================
+    const totalUsers =await User.count();
+    const totalMovies =await Movie.count();
+    const totalTheaters =await Theater.count();
+    const totalShows =await Show.count();
+    const totalBookings =await Booking.count();
 
-    const totalUsers =
-      await User.count();
-
-    const totalMovies =
-      await Movie.count();
-
-    const totalTheaters =
-      await Theater.count();
-
-    const totalShows =
-      await Show.count();
-
-    const totalBookings =
-      await Booking.count();
-
-    // =================================
     // BOOKING COUNTS
-    // =================================
-
     const confirmedBookings =
       await Booking.count({
         where: {
@@ -97,10 +69,7 @@ export const getAdminDashboard = async (
         },
       });
 
-    // =================================
     // GET CONFIRMED BOOKINGS
-    // =================================
-
     const confirmed =
       await Booking.findAll({
         where: {
@@ -115,10 +84,7 @@ export const getAdminDashboard = async (
         ],
       });
 
-    // =================================
     // CALCULATE REVENUE
-    // =================================
-
     const totalRevenue =
       confirmed.reduce(
         (total, booking: any) => {
@@ -132,10 +98,7 @@ export const getAdminDashboard = async (
         0
       );
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Admin dashboard fetched successfully",
@@ -169,17 +132,11 @@ export const getAdminDashboard = async (
       },
     });
 
-  } catch (error: any) {
-
-    console.error(
-      "❌ ADMIN DASHBOARD ERROR:",
-      error
-    );
-
+  }
+  catch (error: any) {
+    console.error("❌ ADMIN DASHBOARD ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to fetch admin dashboard",
-
+      message:"Failed to fetch admin dashboard",
       error: error.message,
     });
   }

@@ -25,9 +25,7 @@ export const adminOnly = async (
 ) => {
   try {
     await request.jwtVerify();
-
     const user = request.user as UserPayload;
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message: "Admin access required",

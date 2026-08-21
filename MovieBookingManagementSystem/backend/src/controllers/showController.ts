@@ -1,8 +1,4 @@
-import {
-  FastifyReply,
-  FastifyRequest,
-} from "fastify";
-
+import {FastifyReply,FastifyRequest,} from "fastify";
 import Show from "../models/Show.js";
 import Movie from "../models/Movie.js";
 import Theater from "../models/Theater.js";
@@ -10,71 +6,28 @@ import Seat from "../models/Seat.js";
 import Booking from "../models/Booking.js";
 import { ensureSeatsForShow } from "../services/seatService.js";
 
-// =====================================
-// ADMIN CHECK
-// =====================================
 
-const checkAdmin = (
-  request: FastifyRequest,
-  reply: FastifyReply
-) => {
-  const user = request.user as {
-    id: number;
-    role: string;
-  };
-
-  if (!user || !user.id) {
-    reply.code(401).send({
-      message:
-        "Unauthorized. Please login first.",
-    });
-
-    return false;
-  }
-
-  if (user.role !== "admin") {
-    reply.code(403).send({
-      message:
-        "Access denied. Admin only.",
-    });
-
-    return false;
-  }
-
-  return true;
-};
-
-
-// =====================================
-// CREATE SHOW
-// ADMIN ONLY
-// POST /api/shows
-// =====================================
-
+// CREATE SHOW POST /api/shows
 export const createShow = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   const sequelize = Show.sequelize!;
   let transaction: import("sequelize").Transaction | null = null;
-
   try {
     const user = request.user as { id?: number; role?: string };
     if (!user?.id) return reply.code(401).send({ message: "Unauthorized. Please login first." });
     if (user.role !== "admin") return reply.code(403).send({ message: "Access denied. Admin only." });
-
     const { movieId, theaterId, showTime, price } = request.body as {
       movieId?: number | string;
       theaterId?: number | string;
       showTime?: string;
       price?: number | string;
     };
-
     const parsedMovieId = Number(movieId);
     const parsedTheaterId = Number(theaterId);
     const parsedPrice = Number(price);
     const parsedShowTime = new Date(showTime ?? "");
-
     if (!Number.isInteger(parsedMovieId) || parsedMovieId <= 0) {
       return reply.code(400).send({ message: "Valid movieId is required" });
     }
@@ -87,15 +40,11 @@ export const createShow = async (
     if (!Number.isFinite(parsedPrice) || parsedPrice <= 0) {
       return reply.code(400).send({ message: "Price must be greater than 0" });
     }
-
     const movie = await Movie.findByPk(parsedMovieId);
     if (!movie) return reply.code(404).send({ message: "Movie not found" });
-
     const theater = await Theater.findByPk(parsedTheaterId);
     if (!theater) return reply.code(404).send({ message: "Theater not found" });
-
     transaction = await sequelize.transaction();
-
     const show = await Show.create(
       {
         movieId: parsedMovieId,
@@ -105,12 +54,9 @@ export const createShow = async (
       },
       { transaction },
     );
-
     const seatResult = await ensureSeatsForShow(show.id, transaction);
-
     await transaction.commit();
     transaction = null;
-
     return reply.code(201).send({
       message: "Show created successfully",
       show,
@@ -119,7 +65,8 @@ export const createShow = async (
         createdSeats: seatResult.createdCount,
       },
     });
-  } catch (error: any) {
+  } 
+  catch (error: any) {
     if (transaction && !(transaction as any).finished) await transaction.rollback();
 
     console.error("CREATE SHOW ERROR:", error);
@@ -134,22 +81,17 @@ export const createShow = async (
         message: `Show ${currentShowId} seat setup failed for theater ${theaterId}. Expected ${expected} seats but found ${actual}.`,
       });
     }
-
     return reply.code(500).send({ message: "Failed to create show", error: message });
   }
 };
 
 
-// =====================================
 // GET ALL SHOWS
-// =====================================
-
 export const getShows = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-
     const shows =
       await Show.findAll({
         include: [
@@ -162,76 +104,43 @@ export const getShows = async (
             as: "theater",
           },
         ],
-
-        order: [
-          ["showTime", "ASC"],
-        ],
+        order: [["showTime", "ASC"],]
       });
-
     return reply.send({
-      message:
-        "Shows fetched successfully",
-
-      totalShows:
-        shows.length,
-
+      message:"Shows fetched successfully",
+      totalShows:shows.length,
       shows,
     });
-
-  } catch (error: any) {
-
-    console.error(
-      "❌ GET SHOWS ERROR:",
-      error
-    );
-
+  }
+  catch (error: any) {
+    console.error("❌ GET SHOWS ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to fetch shows",
-
+      message:"Failed to fetch shows",
       error: error.message,
     });
   }
 };
 
-// =====================================
-// GET SHOW BY ID
-// PUBLIC
-// GET /api/shows/:id
-// =====================================
-
+// GET SHOW BY ID GET /api/shows/:id
 export const getShowById = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
     // GET SHOW ID
-    // =================================
-
-    const { id } =
-      request.params as {
+    const { id } =request.params as {
         id: string;
       };
-
     const showId = Number(id);
 
-    if (
-      !Number.isInteger(showId) ||
-      showId <= 0
-    ) {
+    if (!Number.isInteger(showId) || showId <= 0) {
       return reply.code(400).send({
-        message:
-          "Valid show id is required",
+        message:"Valid show id is required",
       });
     }
 
-    // =================================
     // FIND SHOW
-    // =================================
-
-    const show =
-      await Show.findByPk(showId, {
+    const show =await Show.findByPk(showId, {
         include: [
           {
             model: Movie,
@@ -244,17 +153,12 @@ export const getShowById = async (
           {
             model: Seat,
             as: "seats",
-            order: [
-              ["seatNumber", "ASC"],
-            ],
+            order: [["seatNumber", "ASC"],],
           },
         ],
       });
 
-    // =================================
     // SHOW NOT FOUND
-    // =================================
-
     if (!show) {
       return reply.code(404).send({
         message:
@@ -262,37 +166,23 @@ export const getShowById = async (
       });
     }
 
-    // =================================
+    
     // RESPONSE
-    // =================================
-
     return reply.send({
-      message:
-        "Show fetched successfully",
-
+      message:"Show fetched successfully",
       show,
     });
-
-  } catch (error: any) {
-
-    console.error(
-      "❌ GET SHOW ERROR:",
-      error
-    );
-
+  } 
+  catch (error: any) {
+    console.error("❌ GET SHOW ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to fetch show",
-
+      message:"Failed to fetch show",
       error: error.message,
     });
   }
 };
 
-// =====================================
 // GET SHOWS BY MOVIE
-// =====================================
-
 export const getShowsByMovie = async (
   request: FastifyRequest,
   reply: FastifyReply
@@ -302,28 +192,17 @@ export const getShowsByMovie = async (
       request.params as {
         movieId: string;
       };
-
     const parsedMovieId =
       Number(movieId);
 
-    // =================================
     // VALIDATION
-    // =================================
-
-    if (
-      !Number.isInteger(parsedMovieId) ||
-      parsedMovieId <= 0
-    ) {
+    if (!Number.isInteger(parsedMovieId) || parsedMovieId <= 0) {
       return reply.code(400).send({
-        message:
-          "Valid movieId is required",
+        message:"Valid movieId is required",
       });
     }
 
-    // =================================
     // GET SHOWS
-    // =================================
-
     const shows =
       await Show.findAll({
         where: {
@@ -341,154 +220,92 @@ export const getShowsByMovie = async (
           },
         ],
 
-        order: [
-          ["showTime", "ASC"],
-        ],
+        order: [["showTime", "ASC"],],
       });
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Movie shows fetched successfully",
-
       totalShows:
         shows.length,
-
       shows,
     });
 
-  } catch (error: any) {
-
-    console.error(
-      "❌ GET MOVIE SHOWS ERROR:",
-      error
-    );
-
+  }
+   catch (error: any) {
+    console.error("❌ GET MOVIE SHOWS ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to fetch movie shows",
-
+      message:"Failed to fetch movie shows",
       error: error.message,
     });
   }
 };
 
 
-// =====================================
-// UPDATE SHOW
-// ADMIN ONLY
-// PUT /api/shows/:id
-// =====================================
-
+// UPDATE SHOW  PUT /api/shows/:id
 export const updateShow = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
     };
-
     if (!user || !user.id) {
       return reply.code(401).send({
-        message:
-          "Unauthorized. Please login first.",
+        message:"Unauthorized. Please login first.",
       });
     }
-
-    // =================================
+    
     // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
-        message:
-          "Access denied. Admin only.",
+        message:"Access denied. Admin only.",
       });
     }
 
-    // =================================
     // GET SHOW ID
-    // =================================
-
     const { id } =
       request.params as {
         id: string;
       };
-
     const showId = Number(id);
-
-    if (
-      !Number.isInteger(showId) ||
-      showId <= 0
-    ) {
+    if (!Number.isInteger(showId) || showId <= 0) {
       return reply.code(400).send({
-        message:
-          "Valid show id is required",
+        message:"Valid show id is required",
       });
     }
 
-    // =================================
     // FIND SHOW
-    // =================================
-
-    const show =
-      await Show.findByPk(showId);
-
+    const show =await Show.findByPk(showId);
     if (!show) {
       return reply.code(404).send({
         message:
           "Show not found",
       });
     }
-
-    // =================================
+    
     // GET BODY
-    // =================================
-
-    const {
-      movieId,
-      theaterId,
-      showTime,
-      price,
-    } = request.body as {
+    const {movieId,theaterId,showTime,price,} = request.body as {
       movieId?: number;
       theaterId?: number;
       showTime?: string;
       price?: number;
     };
 
-    // =================================
     // CHECK MOVIE
-    // =================================
-
     if (movieId !== undefined) {
       const parsedMovieId =
         Number(movieId);
 
-      if (
-        !Number.isInteger(parsedMovieId) ||
-        parsedMovieId <= 0
-      ) {
+      if (!Number.isInteger(parsedMovieId) || parsedMovieId <= 0) {
         return reply.code(400).send({
-          message:
-            "Valid movieId is required",
+          message:"Valid movieId is required",
         });
       }
-
-      const movie =
-        await Movie.findByPk(
-          parsedMovieId
-        );
-
+      const movie =await Movie.findByPk(parsedMovieId);
       if (!movie) {
         return reply.code(404).send({
           message:
@@ -497,10 +314,7 @@ export const updateShow = async (
       }
     }
 
-    // =================================
     // CHECK THEATER
-    // =================================
-
     if (theaterId !== undefined) {
       const parsedTheaterId =
         Number(theaterId);
@@ -530,74 +344,46 @@ export const updateShow = async (
       }
     }
 
-    // =================================
     // CHECK SHOW TIME
-    // =================================
-
     let parsedShowTime: Date | undefined;
-
     if (showTime !== undefined) {
       parsedShowTime =
         new Date(showTime);
 
-      if (
-        Number.isNaN(
-          parsedShowTime.getTime()
-        )
-      ) {
+      if (Number.isNaN(parsedShowTime.getTime())) {
         return reply.code(400).send({
-          message:
-            "Invalid showTime",
+          message:"Invalid showTime",
         });
       }
     }
-
-    // =================================
     // CHECK PRICE
-    // =================================
-
     let parsedPrice: number | undefined;
-
     if (price !== undefined) {
       parsedPrice = Number(price);
-
-      if (
-        Number.isNaN(parsedPrice) ||
-        parsedPrice <= 0
-      ) {
+      if (Number.isNaN(parsedPrice) || parsedPrice <= 0) {
         return reply.code(400).send({
-          message:
-            "Price must be greater than 0",
+          message:"Price must be greater than 0",
         });
       }
     }
 
-    // =================================
     // UPDATE SHOW
-    // =================================
-
     await show.update({
       ...(movieId !== undefined && {
         movieId: Number(movieId),
       }),
-
       ...(theaterId !== undefined && {
         theaterId: Number(theaterId),
       }),
-
       ...(parsedShowTime !== undefined && {
         showTime: parsedShowTime,
       }),
-
       ...(parsedPrice !== undefined && {
         price: parsedPrice,
       }),
     });
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Show updated successfully",
@@ -605,17 +391,12 @@ export const updateShow = async (
       show,
     });
 
-  } catch (error: any) {
-
-    console.error(
-      "❌ UPDATE SHOW ERROR:",
-      error
-    );
-
+  } 
+  catch (error: any) {
+    console.error("❌ UPDATE SHOW ERROR:",error);
     return reply.code(500).send({
       message:
         "Failed to update show",
-
       error: error.message,
     });
   }
@@ -623,21 +404,12 @@ export const updateShow = async (
 
 
 
-// =====================================
-// DELETE SHOW
-// ADMIN ONLY
-// DELETE /api/shows/:id
-// =====================================
-
+// DELETE SHOW  DELETE /api/shows/:id
 export const deleteShow = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -650,45 +422,28 @@ export const deleteShow = async (
       });
     }
 
-    // =================================
     // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
-        message:
-          "Access denied. Admin only.",
+        message:"Access denied. Admin only.",
       });
     }
 
-    // =================================
     // GET SHOW ID
-    // =================================
-
     const { id } =
       request.params as {
         id: string;
       };
-
     const showId = Number(id);
-
-    if (
-      !Number.isInteger(showId) ||
-      showId <= 0
-    ) {
+    if (!Number.isInteger(showId) ||showId <= 0) {
       return reply.code(400).send({
         message:
           "Valid show id is required",
       });
     }
 
-    // =================================
     // FIND SHOW
-    // =================================
-
-    const show =
-      await Show.findByPk(showId);
-
+    const show =await Show.findByPk(showId);
     if (!show) {
       return reply.code(404).send({
         message:
@@ -696,17 +451,12 @@ export const deleteShow = async (
       });
     }
 
-    // =================================
     // CHECK BOOKINGS
-    // =================================
-
-    const bookingCount =
-      await Booking.count({
+    const bookingCount =await Booking.count({
         where: {
           showId: showId,
         },
       });
-
     if (bookingCount > 0) {
       return reply.code(409).send({
         message:
@@ -714,57 +464,32 @@ export const deleteShow = async (
       });
     }
 
-    // =================================
     // DELETE SHOW SEATS
-    // =================================
-
     await Seat.destroy({
       where: {
         showId,
       },
     });
 
-    // =================================
     // DELETE SHOW
-    // =================================
-
     await show.destroy();
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
-      message:
-        "Show deleted successfully",
-
+      message:"Show deleted successfully",
       showId,
     });
 
-  } catch (error: any) {
-
-    console.error(
-      "❌ DELETE SHOW ERROR:",
-      error
-    );
-
+  }
+  catch (error: any) {console.error("❌ DELETE SHOW ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to delete show",
-
+      message:"Failed to delete show",
       error: error.message,
     });
   }
 };
 
-
-
-// =====================================
-// GET ALL SHOWS
-// PUBLIC
-// GET /api/shows
-// =====================================
-
+// GET ALL SHOWS GET /api/shows
 export const getAllShows = async (
   request: FastifyRequest,
   reply: FastifyReply
@@ -782,32 +507,18 @@ export const getAllShows = async (
         },
       ],
 
-      order: [
-        ["showTime", "ASC"],
-      ],
+      order: [["showTime", "ASC"],],
     });
-
     return reply.send({
-      message:
-        "Shows fetched successfully",
-
-      totalShows:
-        shows.length,
-
+      message:"Shows fetched successfully",
+      totalShows:shows.length,
       shows,
     });
-
-  } catch (error: any) {
-
-    console.error(
-      "❌ GET ALL SHOWS ERROR:",
-      error
-    );
-
+  } 
+  catch (error: any) {
+    console.error("❌ GET ALL SHOWS ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to fetch shows",
-
+      message:"Failed to fetch shows",
       error: error.message,
     });
   }

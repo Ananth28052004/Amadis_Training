@@ -1,14 +1,6 @@
-import {
-  FastifyReply,
-  FastifyRequest,
-} from "fastify";
-
-import {
-  Transaction,
-} from "sequelize";
-
+import {FastifyReply,FastifyRequest,} from "fastify";
+import {Transaction,} from "sequelize";
 import sequelize from "../config/database.js";
-
 import Booking from "../models/Booking.js";
 import Seat from "../models/Seat.js";
 import User from "../models/User.js";
@@ -17,34 +9,24 @@ import Movie from "../models/Movie.js";
 import Theater from "../models/Theater.js";
 import { ensureSeatsForShow } from "../services/seatService.js";
 
-// =====================================
 // BOOK A SEAT
 // LOGIN REQUIRED
-// =====================================
-
 export const createBooking = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   let transaction: Transaction | null = null;
-
   try {
     const body = (request.body ?? {}) as {
       showId?: number | string;
       seatId?: number | string;
       seatIds?: Array<number | string>;
     };
-
     const parsedShowId = Number(body.showId);
-
     const requestedSeatIds = Array.isArray(body.seatIds)
-      ? body.seatIds.map(Number)
-      : body.seatId !== undefined
-        ? [Number(body.seatId)]
-        : [];
-
+      ? body.seatIds.map(Number): body.seatId !== undefined
+      ? [Number(body.seatId)]:[];
     const uniqueSeatIds = [...new Set(requestedSeatIds)];
-
     if (
       !Number.isInteger(parsedShowId) ||
       parsedShowId <= 0 ||
@@ -57,9 +39,7 @@ export const createBooking = async (
         message: "Valid showId and seatId(s) are required",
       });
     }
-
     const user = request.user as { id?: number };
-
     if (!user?.id) {
       return reply.code(401).send({
         message: "Unauthorized. Please login first.",
@@ -71,7 +51,6 @@ export const createBooking = async (
       await ensureSeatsForShow(parsedShowId);
     } catch (seatError: any) {
       const seatMessage = String(seatError?.message ?? "");
-
       if (seatMessage === "SHOW_NOT_FOUND") {
         return reply.code(404).send({ message: "Show not found" });
       }
@@ -170,11 +149,11 @@ export const createBooking = async (
             }
           : undefined,
     });
-  } catch (error: any) {
+  } 
+  catch (error: any) {
     if (transaction && !(transaction as any).finished) {
       await transaction.rollback();
     }
-
     console.error("❌ CREATE BOOKING ERROR:", error);
 
     // PostgreSQL unique-constraint errors should be shown as a
@@ -192,124 +171,89 @@ export const createBooking = async (
   }
 };
 
-// =====================================
 // CANCEL BOOKING
 // USER CAN CANCEL OWN BOOKING
-// =====================================
 
 export const cancelBooking = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   let transaction: Transaction | null = null;
-
   try {
     const { id } =
       request.params as {
         id: string;
       };
-
     const bookingId = Number(id);
 
-    if (
-      !Number.isInteger(bookingId) ||
-      bookingId <= 0
-    ) {
+    if (!Number.isInteger(bookingId) || bookingId <= 0) {
       return reply.code(400).send({
-        message:
-          "Valid booking id is required",
+        message:"Valid booking id is required",
       });
     }
-
-    const user = request.user as {
-      id: number;
-    };
+    const user = request.user as {id: number};
 
     if (!user || !user.id) {
       return reply.code(401).send({
-        message:
-          "Unauthorized. Please login first.",
+        message:"Unauthorized. Please login first.",
       });
     }
-
     transaction =
       await sequelize.transaction({
         isolationLevel:
           Transaction.ISOLATION_LEVELS.READ_COMMITTED,
       });
 
-    // =================================
     // FIND BOOKING
-    // =================================
-
     const booking =
       await Booking.findOne({
         where: {
           id: bookingId,
           userId: user.id,
         },
-
         transaction,
-
         lock: Transaction.LOCK.UPDATE,
       });
-
     if (!booking) {
       await transaction.rollback();
       transaction = null;
-
       return reply.code(404).send({
         message:
           "Booking not found",
       });
     }
 
-    // =================================
     // CHECK STATUS
-    // =================================
-
-    if (
-      booking.status === "cancelled"
-    ) {
+    if (booking.status === "cancelled") {
       await transaction.rollback();
       transaction = null;
-
       return reply.code(400).send({
         message:
           "Booking is already cancelled",
       });
     }
 
-    // =================================
+    
     // FIND SEAT
-    // =================================
-
-    const seat =
-      await Seat.findOne({
+    const seat =await Seat.findOne({
         where: {
           id: booking.seatId,
           showId: booking.showId,
         },
-
         transaction,
-
         lock: Transaction.LOCK.UPDATE,
       });
 
     if (!seat) {
       await transaction.rollback();
       transaction = null;
-
       return reply.code(404).send({
         message:
           "Seat not found",
       });
     }
 
-    // =================================
     // CANCEL BOOKING
-    // =================================
-
     await booking.update(
       {
         status: "cancelled",
@@ -319,10 +263,7 @@ export const cancelBooking = async (
       }
     );
 
-    // =================================
     // RELEASE SEAT
-    // =================================
-
     await seat.update(
       {
         status: "available",
@@ -332,17 +273,11 @@ export const cancelBooking = async (
       }
     );
 
-    // =================================
     // COMMIT
-    // =================================
-
     await transaction.commit();
     transaction = null;
-
     return reply.send({
-      message:
-        "Booking cancelled successfully",
-
+      message:"Booking cancelled successfully",
       booking: {
         id: booking.id,
         userId: booking.userId,
@@ -350,66 +285,45 @@ export const cancelBooking = async (
         seatId: booking.seatId,
         status: booking.status,
       },
-
       seat: {
         id: seat.id,
         seatNumber: seat.seatNumber,
         status: seat.status,
       },
     });
-
-  } catch (error: any) {
-
-    if (
-      transaction &&
-      !(transaction as any).finished
+  } 
+  catch (error: any) {
+    if (transaction && !(transaction as any).finished
     ) {
       await transaction.rollback();
     }
 
-    console.error(
-      "❌ CANCEL BOOKING ERROR:",
-      error
+    console.error("❌ CANCEL BOOKING ERROR:",error
     );
-
     return reply.code(500).send({
-      message:
-        "Failed to cancel booking",
-
+      message:"Failed to cancel booking",
       error: error.message,
     });
   }
 };
 
-// =====================================
 // GET MY BOOKINGS
 // LOGIN REQUIRED
-// =====================================
-
 export const getMyBookings = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
     };
-
     if (!user || !user.id) {
       return reply.code(401).send({
-        message:
-          "Unauthorized. Please login first.",
+        message:"Unauthorized. Please login first.",
       });
     }
 
-    // =================================
     // GET BOOKINGS
-    // =================================
-
     const bookings =
       await Booking.findAll({
         where: {
@@ -451,49 +365,28 @@ export const getMyBookings = async (
           },
         ],
 
-        order: [
-          ["createdAt", "DESC"],
-        ],
+        order: [["createdAt", "DESC"],],
       });
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Bookings fetched successfully",
-
-      totalBookings:
-        bookings.length,
-
+      totalBookings:bookings.length,
       bookings,
     });
 
-  } catch (error: any) {
-
-    console.error(
-      "❌ GET MY BOOKINGS ERROR:",
-      error
-    );
-
+  } 
+  catch (error: any) {
+    console.error("❌ GET MY BOOKINGS ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to fetch bookings",
-
+      message:"Failed to fetch bookings",
       error: error.message,
     });
   }
 };
-
-
-
-// =====================================
 // GET BOOKING BY ID
 // USER CAN SEE OWN BOOKING
-// =====================================
-
-
 export const getBookingById = async (
   request: FastifyRequest,
   reply: FastifyReply
@@ -503,9 +396,7 @@ export const getBookingById = async (
       request.params as {
         id: string;
       };
-
     const bookingId = Number(id);
-
     if (
       !Number.isInteger(bookingId) ||
       bookingId <= 0
@@ -515,25 +406,20 @@ export const getBookingById = async (
           "Valid booking id is required",
       });
     }
-
     const user = request.user as {
       id: number;
     };
-
     if (!user || !user.id) {
       return reply.code(401).send({
-        message:
-          "Unauthorized. Please login first.",
+        message:"Unauthorized. Please login first.",
       });
     }
-
     const booking =
       await Booking.findOne({
         where: {
           id: bookingId,
           userId: user.id,
         },
-
         include: [
           {
             model: User,
@@ -569,52 +455,30 @@ export const getBookingById = async (
 
     if (!booking) {
       return reply.code(404).send({
-        message:
-          "Booking not found",
+        message:"Booking not found",
       });
     }
-
     return reply.send({
-      message:
-        "Booking fetched successfully",
-
+      message:"Booking fetched successfully",
       booking,
     });
-
-  } catch (error: any) {
-
-    console.error(
-      "❌ GET BOOKING ERROR:",
-      error
-    );
-
+  } 
+  catch (error: any) {
+    console.error("❌ GET BOOKING ERROR:",error);
     return reply.code(500).send({
-      message:
-        "Failed to fetch booking",
-
+      message:"Failed to fetch booking",
       error: error.message,
     });
   }
 };
 
-
-
-
-
-// =====================================
 // GET ALL BOOKINGS
 // ADMIN ONLY
-// =====================================
-
 export const getAllBookings = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -627,10 +491,7 @@ export const getAllBookings = async (
       });
     }
 
-    // =================================
     // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -638,10 +499,7 @@ export const getAllBookings = async (
       });
     }
 
-    // =================================
     // GET ALL BOOKINGS
-    // =================================
-
     const bookings =
       await Booking.findAll({
         include: [
@@ -685,10 +543,7 @@ export const getAllBookings = async (
         ],
       });
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "All bookings fetched successfully",
@@ -722,29 +577,15 @@ export const adminCancelBooking = async (
   let transaction: Transaction | null = null;
 
   try {
-    // =================================
-    // GET BOOKING ID
-    // =================================
-
     const { id } = request.params as {
       id: string;
     };
-
     const bookingId = Number(id);
-
-    if (
-      !Number.isInteger(bookingId) ||
-      bookingId <= 0
-    ) {
+    if (!Number.isInteger(bookingId) || bookingId <= 0) {
       return reply.code(400).send({
         message: "Valid booking id is required",
       });
     }
-
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -756,29 +597,19 @@ export const adminCancelBooking = async (
       });
     }
 
-    // =================================
     // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message: "Access denied. Admin only.",
       });
     }
 
-    // =================================
     // START TRANSACTION
-    // =================================
-
     transaction = await sequelize.transaction({
       isolationLevel:
         Transaction.ISOLATION_LEVELS.READ_COMMITTED,
     });
-
-    // =================================
     // FIND BOOKING
-    // =================================
-
     const booking = await Booking.findByPk(
       bookingId,
       {
@@ -796,23 +627,16 @@ export const adminCancelBooking = async (
       });
     }
 
-    // =================================
     // CHECK STATUS
-    // =================================
-
     if (booking.status === "cancelled") {
       await transaction.rollback();
       transaction = null;
-
       return reply.code(400).send({
         message: "Booking is already cancelled",
       });
     }
 
-    // =================================
     // FIND SEAT
-    // =================================
-
     const seat = await Seat.findOne({
       where: {
         id: booking.seatId,
@@ -831,10 +655,7 @@ export const adminCancelBooking = async (
       });
     }
 
-    // =================================
-    // CANCEL BOOKING
-    // =================================
-
+   // CANCEL BOOKING
     await booking.update(
       {
         status: "cancelled",
@@ -844,10 +665,7 @@ export const adminCancelBooking = async (
       }
     );
 
-    // =================================
     // MAKE SEAT AVAILABLE
-    // =================================
-
     await seat.update(
       {
         status: "available",
@@ -857,17 +675,11 @@ export const adminCancelBooking = async (
       }
     );
 
-    // =================================
     // COMMIT
-    // =================================
-
     await transaction.commit();
     transaction = null;
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message: "Booking cancelled by admin successfully",
 
@@ -907,52 +719,19 @@ export const adminCancelBooking = async (
     });
   }
 };
-// =====================================
+
+
+
+
+
+
 // GET BOOKING STATISTICS
-// ADMIN ONLY
-// =====================================
-
-
-// =====================================
-// GET BOOKING STATISTICS
-// ADMIN ONLY
-// =====================================
-
-
-// =====================================
-// GET BOOKING STATISTICS
-// ADMIN ONLY
-// =====================================
-
-
-// =====================================
-// GET BOOKING STATISTICS
-// ADMIN ONLY
 // GET /api/bookings/admin/stats
-// =====================================
-
-
-// =====================================
-// GET BOOKING STATISTICS
-// ADMIN ONLY
-// GET /api/bookings/admin/stats
-// =====================================
-
-// =====================================
-// GET BOOKING STATISTICS
-// ADMIN ONLY
-// GET /api/bookings/admin/stats
-// =====================================
-
 export const getBookingStats = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -964,11 +743,6 @@ export const getBookingStats = async (
           "Unauthorized. Please login first.",
       });
     }
-
-    // =================================
-    // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -976,10 +750,7 @@ export const getBookingStats = async (
       });
     }
 
-    // =================================
     // GET BOOKINGS + SHOW
-    // =================================
-
     const bookings =
       await Booking.findAll({
         include: [
@@ -994,10 +765,7 @@ export const getBookingStats = async (
         ],
       });
 
-    // =================================
     // CALCULATE BOOKING COUNTS
-    // =================================
-
     const totalBookings =
       bookings.length;
 
@@ -1013,10 +781,7 @@ export const getBookingStats = async (
           booking.status === "cancelled"
       ).length;
 
-    // =================================
     // CALCULATE REVENUE
-    // =================================
-
     let totalRevenue = 0;
 
     for (const booking of bookings) {
@@ -1041,10 +806,7 @@ export const getBookingStats = async (
       }
     }
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Booking statistics fetched successfully",
@@ -1065,9 +827,7 @@ export const getBookingStats = async (
 
   } catch (error: any) {
 
-    console.error(
-      "❌ BOOKING STATS ERROR:",
-      error
+    console.error("❌ BOOKING STATS ERROR:",error
     );
 
     return reply.code(500).send({
@@ -1084,20 +844,13 @@ export const getBookingStats = async (
 
 
 
-// =====================================
 // GET ADMIN BOOKING BY ID
 // ADMIN ONLY
-// =====================================
-
 export const getAdminBookingById = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -1110,10 +863,7 @@ export const getAdminBookingById = async (
       });
     }
 
-    // =================================
     // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -1121,10 +871,7 @@ export const getAdminBookingById = async (
       });
     }
 
-    // =================================
     // GET BOOKING ID
-    // =================================
-
     const { id } = request.params as {
       id: string;
     };
@@ -1141,10 +888,7 @@ export const getAdminBookingById = async (
       });
     }
 
-    // =================================
     // FIND BOOKING
-    // =================================
-
     const booking =
       await Booking.findByPk(
         bookingId,
@@ -1180,10 +924,7 @@ export const getAdminBookingById = async (
         }
       );
 
-    // =================================
     // NOT FOUND
-    // =================================
-
     if (!booking) {
       return reply.code(404).send({
         message:
@@ -1191,10 +932,7 @@ export const getAdminBookingById = async (
       });
     }
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Admin booking fetched successfully",
@@ -1218,20 +956,13 @@ export const getAdminBookingById = async (
   }
 };
 
-// =====================================
 // ADMIN DASHBOARD
 // ADMIN ONLY
-// =====================================
-
 export const getAdminDashboard = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -1244,10 +975,8 @@ export const getAdminDashboard = async (
       });
     }
 
-    // =================================
+    
     // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -1255,17 +984,10 @@ export const getAdminDashboard = async (
       });
     }
 
-    // =================================
     // GET BOOKINGS
-    // =================================
+    const bookings =await Booking.findAll();
 
-    const bookings =
-      await Booking.findAll();
-
-    // =================================
     // BOOKING COUNTS
-    // =================================
-
     const totalBookings =
       bookings.length;
 
@@ -1281,20 +1003,14 @@ export const getAdminDashboard = async (
           booking.status === "cancelled"
       ).length;
 
-    // =================================
     // GET CONFIRMED BOOKINGS
-    // =================================
-
     const confirmedBookingsList =
       bookings.filter(
         (booking) =>
           booking.status === "confirmed"
       );
 
-    // =================================
     // GET SHOWS
-    // =================================
-
     const showIds =
       confirmedBookingsList.map(
         (booking) => booking.showId
@@ -1309,10 +1025,7 @@ export const getAdminDashboard = async (
           })
         : [];
 
-    // =================================
-    // CALCULATE REVENUE
-    // =================================
-
+        // CALCULATE REVENUE
     const totalRevenue =
       confirmedBookingsList.reduce(
         (total, booking) => {
@@ -1331,10 +1044,7 @@ export const getAdminDashboard = async (
         0
       );
 
-    // =================================
     // GET SEATS
-    // =================================
-
     const seats =
       await Seat.findAll();
 
@@ -1353,10 +1063,7 @@ export const getAdminDashboard = async (
           seat.status === "available"
       ).length;
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Admin dashboard fetched successfully",
@@ -1398,21 +1105,13 @@ export const getAdminDashboard = async (
     });
   }
 };
-// =====================================
 // GET CONFIRMED BOOKINGS
-// ADMIN ONLY
 // GET /api/bookings/admin/confirmed
-// =====================================
-
 export const getConfirmedBookings = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -1424,11 +1123,6 @@ export const getConfirmedBookings = async (
           "Unauthorized. Please login first.",
       });
     }
-
-    // =================================
-    // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -1436,10 +1130,7 @@ export const getConfirmedBookings = async (
       });
     }
 
-    // =================================
     // GET CONFIRMED BOOKINGS
-    // =================================
-
     const bookings =
       await Booking.findAll({
         where: {
@@ -1515,21 +1206,13 @@ export const getConfirmedBookings = async (
   }
 };
 
-// =====================================
 // GET CANCELLED BOOKINGS
-// ADMIN ONLY
 // GET /api/bookings/admin/cancelled
-// =====================================
-
 export const getCancelledBookings = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -1541,11 +1224,6 @@ export const getCancelledBookings = async (
           "Unauthorized. Please login first.",
       });
     }
-
-    // =================================
-    // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -1553,10 +1231,7 @@ export const getCancelledBookings = async (
       });
     }
 
-    // =================================
     // GET CANCELLED BOOKINGS
-    // =================================
-
     const bookings =
       await Booking.findAll({
         where: {
@@ -1602,10 +1277,7 @@ export const getCancelledBookings = async (
         ],
       });
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Cancelled bookings fetched successfully",
@@ -1632,21 +1304,13 @@ export const getCancelledBookings = async (
   }
 };
 
-// =====================================
 // GET BOOKINGS BY SHOW
-// ADMIN ONLY
 // GET /api/bookings/admin/show/:showId
-// =====================================
-
 export const getBookingsByShow = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -1658,11 +1322,6 @@ export const getBookingsByShow = async (
           "Unauthorized. Please login first.",
       });
     }
-
-    // =================================
-    // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -1670,10 +1329,7 @@ export const getBookingsByShow = async (
       });
     }
 
-    // =================================
     // GET SHOW ID
-    // =================================
-
     const { showId } =
       request.params as {
         showId: string;
@@ -1692,10 +1348,7 @@ export const getBookingsByShow = async (
       });
     }
 
-    // =================================
     // GET BOOKINGS
-    // =================================
-
     const bookings =
       await Booking.findAll({
         where: {
@@ -1742,10 +1395,7 @@ export const getBookingsByShow = async (
         ],
       });
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Show bookings fetched successfully",
@@ -1774,21 +1424,14 @@ export const getBookingsByShow = async (
   }
 };
 
-// =====================================
 // GET SHOW SEAT STATUS
-// ADMIN ONLY
 // GET /api/bookings/admin/show/:showId/seats
-// =====================================
 
 export const getShowSeatStatus = async (
   request: FastifyRequest,
   reply: FastifyReply
 ) => {
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -1801,10 +1444,7 @@ export const getShowSeatStatus = async (
       });
     }
 
-    // =================================
     // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -1812,10 +1452,7 @@ export const getShowSeatStatus = async (
       });
     }
 
-    // =================================
     // GET SHOW ID
-    // =================================
-
     const { showId } =
       request.params as {
         showId: string;
@@ -1834,10 +1471,7 @@ export const getShowSeatStatus = async (
       });
     }
 
-    // =================================
     // GET SEATS
-    // =================================
-
     const seats =
       await Seat.findAll({
         where: {
@@ -1856,10 +1490,7 @@ export const getShowSeatStatus = async (
       });
     }
 
-    // =================================
     // CALCULATE STATUS
-    // =================================
-
     const totalSeats =
       seats.length;
 
@@ -1875,10 +1506,7 @@ export const getShowSeatStatus = async (
           seat.status === "available"
       ).length;
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Show seat status fetched successfully",
@@ -1911,12 +1539,8 @@ export const getShowSeatStatus = async (
 };
 
 
-// =====================================
 // DELETE BOOKING
-// ADMIN ONLY
 // DELETE /api/bookings/admin/:id
-// =====================================
-
 export const adminDeleteBooking = async (
   request: FastifyRequest,
   reply: FastifyReply
@@ -1924,10 +1548,6 @@ export const adminDeleteBooking = async (
   let transaction: Transaction | null = null;
 
   try {
-    // =================================
-    // GET LOGGED-IN USER
-    // =================================
-
     const user = request.user as {
       id: number;
       role: string;
@@ -1939,11 +1559,6 @@ export const adminDeleteBooking = async (
           "Unauthorized. Please login first.",
       });
     }
-
-    // =================================
-    // ADMIN CHECK
-    // =================================
-
     if (user.role !== "admin") {
       return reply.code(403).send({
         message:
@@ -1951,10 +1566,7 @@ export const adminDeleteBooking = async (
       });
     }
 
-    // =================================
     // GET BOOKING ID
-    // =================================
-
     const { id } =
       request.params as {
         id: string;
@@ -1972,20 +1584,14 @@ export const adminDeleteBooking = async (
       });
     }
 
-    // =================================
     // START TRANSACTION
-    // =================================
-
     transaction =
       await sequelize.transaction({
         isolationLevel:
           Transaction.ISOLATION_LEVELS.READ_COMMITTED,
       });
 
-    // =================================
     // FIND BOOKING
-    // =================================
-
     const booking =
       await Booking.findByPk(
         bookingId,
@@ -2005,10 +1611,7 @@ export const adminDeleteBooking = async (
       });
     }
 
-    // =================================
     // FIND SEAT
-    // =================================
-
     const seat =
       await Seat.findOne({
         where: {
@@ -2021,10 +1624,7 @@ export const adminDeleteBooking = async (
         lock: Transaction.LOCK.UPDATE,
       });
 
-    // =================================
     // MAKE SEAT AVAILABLE
-    // =================================
-
     if (seat) {
       await seat.update(
         {
@@ -2036,25 +1636,16 @@ export const adminDeleteBooking = async (
       );
     }
 
-    // =================================
     // DELETE BOOKING
-    // =================================
-
     await booking.destroy({
       transaction,
     });
 
-    // =================================
     // COMMIT
-    // =================================
-
     await transaction.commit();
     transaction = null;
 
-    // =================================
     // RESPONSE
-    // =================================
-
     return reply.send({
       message:
         "Booking deleted successfully",

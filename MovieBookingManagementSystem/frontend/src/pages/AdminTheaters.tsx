@@ -3,13 +3,12 @@ import { useEffect, useMemo, useState } from "react";
 import AdminNav from "../components/AdminNav";
 import { api } from "../lib/api";
 import type { Theater } from "../lib/api";
-
 const emptyForm = {
   name: "",
   location: "",
   totalSeats: "",
 };
-
+  
 const AdminTheaters = () => {
   const [theaters, setTheaters] = useState<Theater[]>([]);
   const [search, setSearch] = useState("");

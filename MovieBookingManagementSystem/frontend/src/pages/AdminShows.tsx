@@ -3,7 +3,6 @@ import { useEffect, useMemo, useState } from "react";
 import AdminNav from "../components/AdminNav";
 import { api } from "../lib/api";
 import type { Movie, Show, Theater } from "../lib/api";
-
 const emptyForm = { movieId: "", theaterId: "", date: "", time: "", price: "" };
 
 const AdminShows = () => {

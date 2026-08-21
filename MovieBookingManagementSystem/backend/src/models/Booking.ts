@@ -1,9 +1,4 @@
-import {
-  DataTypes,
-  Model,
-  Optional,
-} from "sequelize";
-
+import {DataTypes,Model,Optional,} from "sequelize";
 import sequelize from "../config/database.js";
 
 interface BookingAttributes {
@@ -14,27 +9,14 @@ interface BookingAttributes {
   status: "confirmed" | "cancelled";
 }
 
-interface BookingCreationAttributes
-  extends Optional<
-    BookingAttributes,
-    "id" | "status"
-  > {}
-
-class Booking
-  extends Model<
-    BookingAttributes,
-    BookingCreationAttributes
-  >
-  implements BookingAttributes
+interface BookingCreationAttributes extends Optional<BookingAttributes,"id" | "status"> {}
+class Booking extends Model<BookingAttributes,BookingCreationAttributes>implements BookingAttributes
 {
   declare id: number;
   declare userId: number;
   declare showId: number;
   declare seatId: number;
-
-  declare status:
-    | "confirmed"
-    | "cancelled";
+  declare status:| "confirmed"| "cancelled";
 }
 
 Booking.init(

@@ -1,17 +1,8 @@
-import {
-  FastifyInstance,
-  FastifyReply,
-  FastifyRequest,
-} from "fastify";
+import {FastifyInstance,FastifyReply,FastifyRequest,} from "fastify";
+import {getAdminDashboard,} from "../controllers/adminController.js";
 
-import {
-  getAdminDashboard,
-} from "../controllers/adminController.js";
 
-// =====================================
 // AUTHENTICATION
-// =====================================
-
 const authenticate = async (
   request: FastifyRequest,
   reply: FastifyReply
@@ -26,15 +17,11 @@ const authenticate = async (
   }
 };
 
-// =====================================
 // ADMIN ROUTES
-// =====================================
-
 const adminRoutes = async (
   app: FastifyInstance
 ) => {
-  app.get(
-    "/dashboard",
+  app.get("/dashboard",
     {
       preHandler: authenticate,
     },
