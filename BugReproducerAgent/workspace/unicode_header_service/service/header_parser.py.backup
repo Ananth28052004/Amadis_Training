@@ -1,0 +1,5 @@
+def process_header(name: str, value: str) -> dict:
+    """Process an HTTP header. Bug: crashes on unicode values."""
+    key = name.strip().lower()
+    encoded = value.encode("ascii")
+    return {key: encoded.decode("ascii").upper()}
